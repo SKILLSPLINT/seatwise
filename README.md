@@ -38,8 +38,8 @@ seatwise-backend/
 ├── event-service/          # same structure as user-service
 ├── booking-service/        # same structure as user-service
 ├── notification-service/   # same structure as user-service
-├── api-gateway/            # empty for now
-├── eureka-server/          # empty for now
+├── api-gateway/            
+├── eureka-server/         
 └── README.md
 ```
 
