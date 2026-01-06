@@ -83,7 +83,7 @@ public class UserController {
                 return ResponseEntity.ok(ApiResponse.success("User profile retrieved successfully", userResponse));
         }
 
-        @PostMapping("users/admin/register")
+        @PostMapping("/admin/register")
         @Operation(summary = "Register a new admin", description = "Creates a new admin account with ADMIN role. Requires a valid admin secret key. Profile picture can be uploaded separately using the profile picture upload endpoint.")
         @ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Admin registered successfully", content = @Content(schema = @Schema(implementation = UserResponse.class))),
