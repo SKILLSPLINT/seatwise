@@ -11,7 +11,7 @@ import java.util.UUID;
  */
 public interface FileService {
     /**
-     * Save a file (currently logs only, will be stored in Docker container later)
+     * Save a file (currently logs only will be stored in a Docker container later)
      *
      * @param multipartFile The file to save
      * @return File entity with metadata
@@ -27,7 +27,7 @@ public interface FileService {
     File getFileById(UUID fileId);
 
     /**
-     * Delete file by ID (currently logs only)
+     * Delete a file by ID (currently logs only)
      *
      * @param fileId The file ID
      */

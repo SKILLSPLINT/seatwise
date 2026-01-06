@@ -1,3 +1,5 @@
 spring:
   application:
     name: common
+server:
+  port: 9095

@@ -14,7 +14,7 @@ import java.util.UUID;
 
 /**
  * FileService implementation.
- * Currently logs file operations as placeholder for future Docker container storage.
+ * Currently, logs file operations as a placeholder for future Docker container storage.
  */
 @Slf4j
 @Service
@@ -38,7 +38,7 @@ public class FileServiceImpl implements FileService {
         file.setSize((int) multipartFile.getSize());
         file.setSizeType(EFileSizeType.B);
         file.setType(multipartFile.getContentType());
-        file.setStatus(EFileStatus.PENDING); // Will be ACTIVE when stored in Docker container
+        file.setStatus(EFileStatus.PENDING); // Will be ACTIVE when stored in a Docker container
 
         File savedFile = fileRepository.save(file);
         log.info("File metadata saved to database - File ID: {}, Status: PENDING (will be stored in Docker container later)",

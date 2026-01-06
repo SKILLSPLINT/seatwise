@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,7 +22,7 @@ public class UserResponse {
     private EGender gender;
     private Set<String> roles;
     private String profileImageUrl;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private String createdAt;  // Timezone-converted string
+    private String updatedAt;  // Timezone-converted string
 }
 
