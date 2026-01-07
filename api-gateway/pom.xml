@@ -18,10 +18,15 @@
     <description>Routes requests to microservices</description>
 
     <dependencies>
-        <!-- Spring Boot Reactive Web -->
+        <!-- Spring Boot webflux -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <!--spring security-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
         <!-- Spring Boot Actuator -->
@@ -89,6 +94,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.seatwise</groupId>
+            <artifactId>common</artifactId>
         </dependency>
 
     </dependencies>

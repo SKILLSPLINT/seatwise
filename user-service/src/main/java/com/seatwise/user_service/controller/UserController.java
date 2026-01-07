@@ -7,6 +7,7 @@ import com.seatwise.user_service.dto.response.ApiResponse;
 import com.seatwise.user_service.dto.response.LoginResponse;
 import com.seatwise.user_service.dto.response.UserResponse;
 import com.seatwise.user_service.service.UserService;
+import exception.UnauthorizedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -68,18 +68,22 @@ public class UserController {
                 return ResponseEntity.ok(ApiResponse.success("Login successful", loginResponse));
         }
 
-        @GetMapping("/user/{id}")
-        @Operation(summary = "Get user profile", description = "Retrieves user profile information by user ID")
+        @GetMapping("/user/me")
+        @Operation(summary = "Get current user profile", description = "Retrieves the authenticated user's profile information from the JWT token")
         @ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile retrieved successfully", content = @Content(schema = @Schema(implementation = UserResponse.class))),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token", content = @Content),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found", content = @Content)
         })
-        public ResponseEntity<ApiResponse<UserResponse>> getUserProfile(
-                        @Parameter(description = "User ID", required = true, example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable UUID id,
-                        HttpServletRequest request) {
-                log.info("GET /api/v1/users/{} - Fetching user profile", id);
+        public ResponseEntity<ApiResponse<UserResponse>> getUserProfile(HttpServletRequest request) {
+                String userEmail = request.getHeader("X-User-Email");
+                if (userEmail == null || userEmail.isEmpty()) {
+                        log.warn("GET /api/v1/auth/user/me - Missing X-User-Email header");
+                        throw new UnauthorizedException("Unauthorized - Missing user information");
+                }
+                log.info("GET /api/v1/auth/user/me - Fetching user profile for: {}", userEmail);
                 String userTimeZone = request.getHeader("time-zone");
-                UserResponse userResponse = userService.getUserProfile(id, userTimeZone);
+                UserResponse userResponse = userService.getUserProfile(userEmail, userTimeZone);
                 return ResponseEntity.ok(ApiResponse.success("User profile retrieved successfully", userResponse));
         }
 
@@ -100,20 +104,25 @@ public class UserController {
                                 .body(ApiResponse.success("Admin registered successfully", adminResponse));
         }
 
-        @PutMapping(value = "user/{userId}/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-        @Operation(summary = "Upload or update profile picture", description = "Uploads or updates the profile picture for a user. Accepts image files. Works for both regular users and admins.", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
+        @PutMapping(value = "/user/me/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        @Operation(summary = "Upload or update profile picture", description = "Uploads or updates the authenticated user's profile picture. Accepts image files. Works for both regular users and admins.", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
         @ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile picture uploaded successfully", content = @Content(schema = @Schema(implementation = UserResponse.class))),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or file is empty", content = @Content),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized - Missing or invalid token", content = @Content),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found", content = @Content)
         })
         public ResponseEntity<ApiResponse<UserResponse>> uploadProfilePicture(
-                        @Parameter(description = "User ID", required = true, example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable UUID userId,
                         @Parameter(name = "profilePicture", description = "Profile picture image file", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)) @RequestPart("profile") MultipartFile file,
                         HttpServletRequest request) {
-                log.info("PUT /api/v1/auth/users/{}/profile-picture - Uploading profile picture", userId);
+                String userEmail = request.getHeader("X-User-Email");
+                if (userEmail == null || userEmail.isEmpty()) {
+                        log.warn("PUT /api/v1/auth/user/me/profile-picture - Missing X-User-Email header");
+                        throw new UnauthorizedException("Unauthorized - Missing user information");
+                }
+                log.info("PUT /api/v1/auth/user/me/profile-picture - Uploading profile picture for: {}", userEmail);
                 String userTimeZone = request.getHeader("time-zone");
-                UserResponse userResponse = userService.uploadProfilePicture(userId, file, userTimeZone);
+                UserResponse userResponse = userService.uploadProfilePicture(userEmail, file, userTimeZone);
                 return ResponseEntity.ok(ApiResponse.success("Profile picture uploaded successfully", userResponse));
         }
 }

@@ -1,5 +1,6 @@
 package com.seatwise.user_service.service;
 
+import com.seatwise.user_service.Utils.JwtUtils;
 import enums.ERole;
 import exception.BadRequestException;
 import exception.ConflictException;
@@ -25,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -90,26 +90,27 @@ public class UserServiceImpl implements UserService {
         }
 
         log.info("Login successful - User ID: {}, Email: {}", user.getId(), user.getEmail());
-
-        // TODO: Generate JWT token when Spring Security is integrated
-        // For now, return placeholder token
-        String placeholderToken = "placeholder-jwt-token-" + user.getId();
-
+        Role lastAdded = null;
+        for (Role r : user.getRoles()) {
+            lastAdded = r;
+        }
+        assert lastAdded != null;
+        String token = JwtUtils.generateToken(lastAdded.getName(), user.getEmail());
         return LoginResponse.builder()
-                .token(placeholderToken)
+                .token(token)
                 .user(mapToUserResponse(user, userTimeZone))
                 .build();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponse getUserProfile(UUID userId, String userTimeZone) {
-        log.info("Fetching user profile - User ID: {}", userId);
+    public UserResponse getUserProfile(String userEmail, String userTimeZone) {
+        log.info("Fetching user profile - User Email: {}", userEmail);
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> {
-                    log.warn("User not found - User ID: {}", userId);
-                    return new ResourceNotFoundException("User", "id", userId.toString());
+                    log.warn("User not found - User Email: {}", userEmail);
+                    return new ResourceNotFoundException("User", "email", userEmail);
                 });
 
         return mapToUserResponse(user, userTimeZone);
@@ -154,32 +155,32 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse uploadProfilePicture(UUID userId, MultipartFile profilePicture, String userTimeZone) {
-        log.info("Uploading profile picture for user ID: {}", userId);
+    public UserResponse uploadProfilePicture(String userEmail, MultipartFile profilePicture, String userTimeZone) {
+        log.info("Uploading profile picture for user Email: {}", userEmail);
 
         // Validate a file
         if (profilePicture == null || profilePicture.isEmpty()) {
-            log.warn("Profile picture upload failed - File is empty for user ID: {}", userId);
+            log.warn("Profile picture upload failed - File is empty for user Email: {}", userEmail);
             throw new BadRequestException("Profile picture file cannot be empty");
         }
 
         // Validate file is an image
         String contentType = profilePicture.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            log.warn("Profile picture upload failed - Invalid file type: {} for user ID: {}", contentType, userId);
+            log.warn("Profile picture upload failed - Invalid file type: {} for user Email: {}", contentType, userEmail);
             throw new BadRequestException("File must be an image");
         }
 
         // Find user
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> {
-                    log.warn("Profile picture upload failed - User not found: {}", userId);
-                    return new ResourceNotFoundException("User", "id", userId.toString());
+                    log.warn("Profile picture upload failed - User not found: {}", userEmail);
+                    return new ResourceNotFoundException("User", "email", userEmail);
                 });
 
         // Delete old profile picture if exists
         if (user.getProfileImage() != null) {
-            log.info("Deleting old profile picture - File ID: {} for user ID: {}", user.getProfileImage().getId(), userId);
+            log.info("Deleting old profile picture - File ID: {} for user Email: {}", user.getProfileImage().getId(), userEmail);
             try {
                 fileService.deleteFile(user.getProfileImage().getId());
             } catch (Exception e) {
@@ -192,14 +193,14 @@ public class UserServiceImpl implements UserService {
         try {
             File file = fileService.saveFile(profilePicture);
             user.setProfileImage(file);
-            log.info("Profile picture saved - File ID: {} for user ID: {}", file.getId(), userId);
+            log.info("Profile picture saved - File ID: {} for user Email: {}", file.getId(), userEmail);
         } catch (Exception e) {
-            log.error("Error saving profile picture for user ID {}: {}", userId, e.getMessage());
+            log.error("Error saving profile picture for user Email {}: {}", userEmail, e.getMessage());
             throw new BadRequestException("Failed to save profile picture: " + e.getMessage());
         }
 
         User updatedUser = userRepository.save(user);
-        log.info("Profile picture uploaded successfully for user ID: {}", userId);
+        log.info("Profile picture uploaded successfully for user Email: {}", userEmail);
 
         return mapToUserResponse(updatedUser, userTimeZone);
     }
@@ -208,7 +209,7 @@ public class UserServiceImpl implements UserService {
      * Validates that a user with the given email or phone number does not exist.
      * Uses a single database query to check both fields efficiently.
      *
-     * @param email the email to check
+     * @param email       the email to check
      * @param phoneNumber the phone number to check
      * @throws ConflictException if a user exists with the given email or phone number
      */
