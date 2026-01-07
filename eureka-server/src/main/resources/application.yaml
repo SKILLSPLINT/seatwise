@@ -15,8 +15,6 @@ server:
     key-store-password: 200696
     key-store-type: PKCS12
     key-alias: eureka-server
-  servlet:
-    context-path: /dashboard
 management:
   endpoints:
     web:

@@ -8,11 +8,11 @@ SeatWise is a microservices-based backend system for event ticket booking. The s
 ## Services
 
 | Service Name         | Port | Database         | Description                                               |
-| -------------------- | ---- | ---------------- | --------------------------------------------------------- |
-| User Service         | 9090 | `userdb`         | Manages user registration, login, and profiles.           |
-| Event Service        | 9091 | `eventdb`        | Manages events creation, listing, and details.            |
-| Booking Service      | 9092 | `bookingdb`      | Handles seat selection, reservations, and bookings.       |
-| Notification Service | 9093 | `notificationdb` | Sends notifications to users (async, future integration). |
+| -------------------- |------| ---------------- | --------------------------------------------------------- |
+| User Service         | 9091 | `userdb`         | Manages user registration, login, and profiles.           |
+| Event Service        | 9092 | `eventdb`        | Manages events creation, listing, and details.            |
+| Booking Service      | 9093 | `bookingdb`      | Handles seat selection, reservations, and bookings.       |
+| Notification Service | 9094 | `notificationdb` | Sends notifications to users (async, future integration). |
 
 ## Tech Stack
 
@@ -72,10 +72,10 @@ mvn spring-boot:run
 
 Default ports:
 
-* User Service: 9090
-* Event Service: 9091
+* User Service: 9091
+* Event Service: 9092
 * Booking Service: 9092
-* Notification Service: 9093
+* Notification Service: 9094
 
 ## Configuration
 
