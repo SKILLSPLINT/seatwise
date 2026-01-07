@@ -34,7 +34,7 @@ public class UserController {
 
         private final UserService userService;
 
-        @PostMapping("/users/register")
+        @PostMapping("/register")
         @Operation(summary = "Register a new user", description = "Registers a new user account. Profile picture can be uploaded separately using the profile picture upload endpoint.")
 
         @ApiResponses(value = {
@@ -68,7 +68,7 @@ public class UserController {
                 return ResponseEntity.ok(ApiResponse.success("Login successful", loginResponse));
         }
 
-        @GetMapping("/users/{id}")
+        @GetMapping("/user/{id}")
         @Operation(summary = "Get user profile", description = "Retrieves user profile information by user ID")
         @ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile retrieved successfully", content = @Content(schema = @Schema(implementation = UserResponse.class))),
@@ -100,7 +100,7 @@ public class UserController {
                                 .body(ApiResponse.success("Admin registered successfully", adminResponse));
         }
 
-        @PutMapping(value = "/users/{userId}/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        @PutMapping(value = "user/{userId}/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         @Operation(summary = "Upload or update profile picture", description = "Uploads or updates the profile picture for a user. Accepts image files. Works for both regular users and admins.", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)))
         @ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile picture uploaded successfully", content = @Content(schema = @Schema(implementation = UserResponse.class))),
