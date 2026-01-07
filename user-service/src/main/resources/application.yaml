@@ -47,19 +47,19 @@ eureka:
     fetch-registry: true
 
   instance:
-    prefer-ip-address: true
+    prefer-ip-address: true #user ip address
     instance-id: ${spring.application.name}-${server.port}
     metadata-map:
       version: 1.0.0
       environment: dev
-    lease-renewal-interval-in-seconds: 15
-    lease-expiration-duration-in-seconds: 45
+    lease-renewal-interval-in-seconds: 15 #ping 15 secs
+    lease-expiration-duration-in-seconds: 45 # no response in this timme service put down
 
 management:
   endpoints:
     web:
       exposure:
-        include: health, info, metrics, prometheus
+        include: health, info, metrics, prometheus #endpoints to expose for health check
   endpoint:
     health:
       show-details: always
