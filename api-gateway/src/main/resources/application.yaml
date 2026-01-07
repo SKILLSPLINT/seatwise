@@ -1,6 +1,45 @@
 server:
-  port: 8085
+  port: 9090
 
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/v1/auth/**
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.seatwise: DEBUG
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true #user ip address
+    instance-id: ${spring.application.name}-${server.port}
+    metadata-map:
+      version: 1.0.0
+      environment: dev
+    lease-renewal-interval-in-seconds: 15 #ping 15 secs
+    lease-expiration-duration-in-seconds: 45 # no response in this timme service put down
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
