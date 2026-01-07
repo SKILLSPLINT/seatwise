@@ -1,6 +1,6 @@
 package com.seatwise.user_service.model;
 
-import com.seatwise.common.enums.EGender;
+import enums.EGender;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

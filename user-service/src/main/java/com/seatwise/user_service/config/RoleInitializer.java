@@ -1,6 +1,6 @@
 package com.seatwise.user_service.config;
 
-import com.seatwise.common.enums.ERole;
+import enums.ERole;
 import com.seatwise.user_service.model.Role;
 import com.seatwise.user_service.repository.RoleRepository;
 import jakarta.annotation.PostConstruct;

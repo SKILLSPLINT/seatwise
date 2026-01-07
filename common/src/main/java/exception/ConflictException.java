@@ -1,4 +1,4 @@
-package com.seatwise.common.exception;
+package exception;
 
 public class ConflictException extends RuntimeException {
     public ConflictException(String message) {

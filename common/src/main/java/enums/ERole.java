@@ -1,4 +1,4 @@
-package com.seatwise.common.enums;
+package enums;
 
 public enum ERole {
     ADMIN, USER,SYSTEM

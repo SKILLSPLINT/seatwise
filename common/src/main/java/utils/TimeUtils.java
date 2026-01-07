@@ -1,4 +1,4 @@
-package com.seatwise.common.utils;
+package utils;
 
 import java.time.Instant;
 import java.time.ZoneId;

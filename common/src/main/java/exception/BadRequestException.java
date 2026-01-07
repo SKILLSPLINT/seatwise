@@ -1,4 +1,4 @@
-package com.seatwise.common.exception;
+package exception;
 
 public class BadRequestException extends RuntimeException {
     public BadRequestException(String message) {

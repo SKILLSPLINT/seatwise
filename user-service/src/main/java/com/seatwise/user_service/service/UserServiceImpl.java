@@ -1,11 +1,11 @@
 package com.seatwise.user_service.service;
 
-import com.seatwise.common.enums.ERole;
-import com.seatwise.common.exception.BadRequestException;
-import com.seatwise.common.exception.ConflictException;
-import com.seatwise.common.exception.ResourceNotFoundException;
-import com.seatwise.common.exception.UnauthorizedException;
-import com.seatwise.common.utils.TimeUtils;
+import enums.ERole;
+import exception.BadRequestException;
+import exception.ConflictException;
+import exception.ResourceNotFoundException;
+import exception.UnauthorizedException;
+import utils.TimeUtils;
 import com.seatwise.user_service.dto.request.AdminRegisterRequest;
 import com.seatwise.user_service.dto.request.LoginRequest;
 import com.seatwise.user_service.dto.request.RegisterRequest;

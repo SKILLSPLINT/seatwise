@@ -1,4 +1,4 @@
-package com.seatwise.common.enums;
+package enums;
 
 public enum EGender {
     MALE, FEMALE, OTHER

@@ -1,7 +1,7 @@
 package com.seatwise.user_service.model;
 
-import com.seatwise.common.enums.EFileSizeType;
-import com.seatwise.common.enums.EFileStatus;
+import enums.EFileSizeType;
+import enums.EFileStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

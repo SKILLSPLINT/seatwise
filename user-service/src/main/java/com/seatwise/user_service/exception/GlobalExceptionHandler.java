@@ -1,5 +1,6 @@
-package com.seatwise.common.exception;
+package com.seatwise.user_service.exception;
 
+import exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -117,8 +118,7 @@ public class GlobalExceptionHandler {
     private Map<String, String> extractValidationErrors(List<ObjectError> allErrors) {
         Map<String, String> errors = new HashMap<>();
         allErrors.forEach(error -> {
-            if (error instanceof FieldError) {
-                FieldError fieldError = (FieldError) error;
+            if (error instanceof FieldError fieldError) {
                 errors.put(fieldError.getField(), fieldError.getDefaultMessage());
             } else {
                 errors.put(error.getObjectName(), error.getDefaultMessage());

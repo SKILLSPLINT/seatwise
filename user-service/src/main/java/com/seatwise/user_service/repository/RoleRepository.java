@@ -1,6 +1,6 @@
 package com.seatwise.user_service.repository;
 
-import com.seatwise.common.enums.ERole;
+import enums.ERole;
 import com.seatwise.user_service.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

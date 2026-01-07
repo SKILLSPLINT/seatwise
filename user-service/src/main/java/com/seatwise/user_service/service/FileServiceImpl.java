@@ -1,8 +1,8 @@
 package com.seatwise.user_service.service;
 
-import com.seatwise.common.enums.EFileSizeType;
-import com.seatwise.common.enums.EFileStatus;
-import com.seatwise.common.exception.ResourceNotFoundException;
+import enums.EFileSizeType;
+import enums.EFileStatus;
+import exception.ResourceNotFoundException;
 import com.seatwise.user_service.model.File;
 import com.seatwise.user_service.repository.FileRepository;
 import lombok.RequiredArgsConstructor;

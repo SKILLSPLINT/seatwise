@@ -1,6 +1,6 @@
 package com.seatwise.user_service.dto.request;
 
-import com.seatwise.common.enums.EGender;
+import enums.EGender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

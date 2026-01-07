@@ -1,6 +1,6 @@
 package com.seatwise.user_service.model;
 
-import com.seatwise.common.enums.ERole;
+import enums.ERole;
 import jakarta.persistence.*;
 import lombok.Data;
 

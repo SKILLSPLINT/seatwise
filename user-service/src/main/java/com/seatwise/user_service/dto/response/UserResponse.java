@@ -1,6 +1,6 @@
 package com.seatwise.user_service.dto.response;
 
-import com.seatwise.common.enums.EGender;
+import enums.EGender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

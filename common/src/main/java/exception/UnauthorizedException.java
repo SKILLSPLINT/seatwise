@@ -1,4 +1,4 @@
-package com.seatwise.common.exception;
+package exception;
 
 public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException(String message) {
