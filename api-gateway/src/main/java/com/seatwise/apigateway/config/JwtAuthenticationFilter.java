@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -44,6 +45,7 @@ public class JwtAuthenticationFilter implements WebFilter {
                 // Extract user information from a token
                 String username = jwtUtil.extractUserName(token);
                 ERole role = jwtUtil.extractRole(token);
+                String userId = jwtUtil.extractUserId(token);
 
                 // Create Spring Security Authentication
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(
@@ -55,6 +57,7 @@ public class JwtAuthenticationFilter implements WebFilter {
                 ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                         .header("X-User-Email", username)
                         .header("X-User-Role", role.name())
+                        .header("X-User-Id", userId)
                         .build();
 
                 ServerWebExchange mutatedExchange = exchange.mutate()

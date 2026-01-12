@@ -4,6 +4,7 @@ import com.seatwise.event_service.dto.request.CreateEventRequest;
 import com.seatwise.event_service.dto.request.UpdateEventRequest;
 import com.seatwise.event_service.dto.response.EventDetailResponseDto;
 import com.seatwise.event_service.dto.response.EventResponseDto;
+import com.seatwise.event_service.dto.response.SeatResponseDto;
 import com.seatwise.event_service.service.EventService;
 import dto.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -95,4 +96,110 @@ public class EventController {
                 BaseResponse.success("Event details retrieved successfully", eventDetail)
         );
     }
+
+    @DeleteMapping("/{eventId}")
+    @Operation(summary = "Delete event", description = "Deletes an event and all its related seats and image")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Event deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Event not found")
+    })
+    public ResponseEntity<Void> deleteEvent(
+            @Parameter(description = "Event ID", required = true) @PathVariable UUID eventId
+    ) {
+        eventService.deleteEvent(eventId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{eventId}/reserve/{seatId}")
+    @Operation(
+            summary = "Reserve a seat",
+            description = "Temporarily reserves a specific seat for the authenticated user. " +
+                    "The reservation expires automatically if not confirmed within the allowed time window."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Seat reserved successfully"),
+            @ApiResponse(responseCode = "400", description = "Seat is not available for reservation"),
+            @ApiResponse(responseCode = "404", description = "Event or seat not found"),
+            @ApiResponse(responseCode = "409", description = "Seat already reserved or booked")
+    })
+    public ResponseEntity<BaseResponse<SeatResponseDto>> reserveSeat(
+            @Parameter(
+                    description = "Authenticated user ID (passed from API Gateway)",
+                    required = true,
+                    example = "c1a2f3d4-5678-4abc-9def-1234567890ab"
+            )
+            @RequestHeader("X-User-Id") UUID userId,
+
+            @Parameter(
+                    description = "User time zone (e.g., Africa/Kigali, Europe/London)",
+                    example = "Africa/Kigali"
+            )
+            @RequestHeader(value = "time-zone", required = false) String userTimeZone,
+
+            @Parameter(
+                    description = "Event ID",
+                    required = true,
+                    example = "9a1b2c3d-1111-4aaa-bbbb-ccccdddd0000"
+            )
+            @PathVariable UUID eventId,
+
+            @Parameter(
+                    description = "Seat ID to reserve",
+                    required = true,
+                    example = "7f8e9d10-2222-4bbb-aaaa-eeeeffff9999"
+            )
+            @PathVariable UUID seatId
+    ) {
+        SeatResponseDto seat = eventService.reserveSeat(seatId, userId, userTimeZone);
+        return ResponseEntity.ok(
+                BaseResponse.success("Seat reserved successfully", seat)
+        );
+    }
+
+    @PatchMapping("/{eventId}/confirm/{seatId}")
+    @Operation(
+            summary = "Confirm seat booking",
+            description = "Finalizes a previously reserved seat and marks it as booked. " +
+                    "Once confirmed, the seat cannot be released or reserved by other users."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Seat confirmed successfully"),
+            @ApiResponse(responseCode = "400", description = "Seat is not reserved or reservation expired"),
+            @ApiResponse(responseCode = "404", description = "Event or seat not found"),
+            @ApiResponse(responseCode = "409", description = "Seat already booked or confirmed by another user")
+    })
+    public ResponseEntity<BaseResponse<SeatResponseDto>> confirmSeat(
+            @Parameter(
+                    description = "Authenticated user ID (passed from API Gateway)",
+                    required = true,
+                    example = "c1a2f3d4-5678-4abc-9def-1234567890ab"
+            )
+            @RequestHeader("X-User-Id") UUID userId,
+
+            @Parameter(
+                    description = "User time zone (e.g., Africa/Kigali, Europe/London)",
+                    example = "Africa/Kigali"
+            )
+            @RequestHeader(value = "time-zone", required = false) String userTimeZone,
+
+            @Parameter(
+                    description = "Event ID",
+                    required = true,
+                    example = "9a1b2c3d-1111-4aaa-bbbb-ccccdddd0000"
+            )
+            @PathVariable UUID eventId,
+
+            @Parameter(
+                    description = "Seat ID to confirm",
+                    required = true,
+                    example = "7f8e9d10-2222-4bbb-aaaa-eeeeffff9999"
+            )
+            @PathVariable UUID seatId
+    ) {
+        SeatResponseDto seat = eventService.confirmSeat(seatId, userId, userTimeZone);
+        return ResponseEntity.ok(
+                BaseResponse.success("Seat confirmed successfully", seat)
+        );
+    }
+
 }

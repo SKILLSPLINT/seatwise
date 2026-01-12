@@ -22,7 +22,7 @@ public class Seat extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private ESeat status =ESeat.AVAILABLE;
+    private ESeat status = ESeat.AVAILABLE;
 
     @Column(name = "reserved_at", nullable = true)
     private Instant reservedAt;
@@ -32,5 +32,6 @@ public class Seat extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false, referencedColumnName = "id")
     private Event event;
-
+    @Version
+    private Long version;
 }

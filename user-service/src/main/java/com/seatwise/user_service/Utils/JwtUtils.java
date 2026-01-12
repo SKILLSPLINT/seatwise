@@ -10,10 +10,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
@@ -23,9 +20,10 @@ public class JwtUtils {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public static  String generateToken(ERole role, String email) {
+    public static  String generateToken(UUID userId, ERole role, String email) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
+        claims.put("userId", userId.toString());
         return generateRefreshToken(claims, email);
     }
 

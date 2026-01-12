@@ -8,13 +8,18 @@ import com.seatwise.event_service.dto.response.SeatResponseDto;
 import com.seatwise.event_service.model.Event;
 import com.seatwise.event_service.model.Seat;
 import com.seatwise.event_service.repository.EventRepository;
+import com.seatwise.event_service.repository.SeatRepository;
 import enums.ESeat;
+import exception.BadRequestException;
+import exception.ConflictException;
 import exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import utils.TimeUtils;
 
@@ -29,6 +34,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepo;
+    private final SeatRepository seatRepo;
+
+    @Value("${seat.release.timeout}")
+    private String RESERVATION_TIMEOUT;
 
     @Override
     @Transactional
@@ -110,6 +119,90 @@ public class EventServiceImpl implements EventService {
         log.debug("Event {} has {} seats", eventId, seats != null ? seats.size() : 0);
 
         return mapToEventDetailResponseDto(event, userTimeZone);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(UUID eventId) {
+        log.info("Deleting event with ID: {}", eventId);
+
+        Event event = eventRepo.findById(eventId)
+                .orElseThrow(() -> {
+                    log.warn("Event not found with ID: {} for deletion", eventId);
+                    return new ResourceNotFoundException("Event", "id", eventId.toString());
+                });
+
+        // Because of cascade = CascadeType.ALL and orphanRemoval = true on Event.seats,
+        // and cascade = CascadeType.ALL on image, deleting the event will also delete
+        // all related seats and image.
+        eventRepo.delete(event);
+        log.info("Event with ID: {} and all related seats/image deleted successfully", eventId);
+    }
+
+    @Override
+    @Transactional
+    public SeatResponseDto reserveSeat(UUID seatId, UUID userId, String userTimeZone) {
+        Seat seat = seatRepo.findById(seatId).orElseThrow(() -> new ResourceNotFoundException("Seat", "id", seatId.toString()));
+        if (seat.getStatus() != ESeat.AVAILABLE) {
+            throw new ConflictException("seat is already reserved , please  try another seat");
+        }
+        seat.setStatus(ESeat.RESERVED);
+        seat.setUserId(userId);
+        seat.setReservedAt(Instant.now());
+        Event event = seat.getEvent();
+        event.setAvailableSeats(event.getAvailableSeats() - 1);
+        eventRepo.save(event);
+        return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone);
+    }
+
+    @Override
+    public SeatResponseDto confirmSeat(UUID seatId, UUID userId, String userTimeZone) {
+        Seat seat = seatRepo.findById(seatId).orElseThrow(() -> new ResourceNotFoundException("Seat", "id", seatId.toString()));
+        if (seat.getStatus() != ESeat.RESERVED) {
+            throw new BadRequestException("seat is not reserved");
+        }
+        if (seat.getUserId() != userId) {
+            throw new BadRequestException("seat is not reserved by this user");
+        }
+        seat.setStatus(ESeat.BOOKED);
+        return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone);
+    }
+
+
+    @Transactional
+    @Scheduled(fixedRateString = "${seat.release.interval}")
+    public void releaseSeat() {
+        Instant now = Instant.now();
+        List<Seat> reservedSeats = seatRepo.findByStatus(ESeat.RESERVED);
+
+        int releasedCount = 0;
+
+        for (Seat seat : reservedSeats) {
+            Instant reservedAt = seat.getReservedAt();
+
+            if (reservedAt == null) {
+                continue;
+            }
+
+            boolean expired = now
+                    .minusSeconds(Long.parseLong(RESERVATION_TIMEOUT))
+                    .isAfter(reservedAt);
+
+            if (!expired) {
+                continue;
+            }
+
+            seat.setStatus(ESeat.AVAILABLE);
+            seat.setReservedAt(null);
+            seat.setUserId(null);
+
+            Event event = seat.getEvent();
+            event.setAvailableSeats(event.getAvailableSeats() + 1);
+
+            releasedCount++;
+        }
+
+        log.info("Seat release job finished. Released {} seats.", releasedCount);
     }
 
     /**

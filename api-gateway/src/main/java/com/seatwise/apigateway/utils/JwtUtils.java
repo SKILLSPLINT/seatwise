@@ -10,10 +10,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
@@ -80,7 +77,7 @@ public class JwtUtils {
 
     /**
      * Validates token structure, signature, and expiration
-     * 
+     *
      * @param token JWT token to validate
      * @return true if the token is valid (not expired and properly signed)
      */
@@ -97,7 +94,7 @@ public class JwtUtils {
 
     /**
      * Validates token and checks if it matches the given username
-     * 
+     *
      * @param token    JWT token to validate
      * @param username Username to match against a token subject
      * @return true if the token is valid and matches the username
@@ -114,6 +111,10 @@ public class JwtUtils {
     private boolean isTokenExpired(String token) {
         final Date expirationDate = extractClaim(token, Claims::getExpiration);
         return expirationDate.before(new Date());
+    }
+
+    public String extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", String.class));
     }
 
 }

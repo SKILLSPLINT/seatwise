@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
         Role userRole = roleRepository.findByName(ERole.USER)
                 .orElseThrow(() -> {
                     log.error("USER role not found in database - this should not happen!");
-                    return new RuntimeException("USER role not found. Please check database initialization.");
+                    return new ResourceNotFoundException("USER role not found. Please check database initialization.");
                 });
         user.getRoles().add(userRole);
 
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
             lastAdded = r;
         }
         assert lastAdded != null;
-        String token = JwtUtils.generateToken(lastAdded.getName(), user.getEmail());
+        String token = JwtUtils.generateToken(user.getId(), lastAdded.getName(), user.getEmail());
         return LoginResponse.builder()
                 .token(token)
                 .user(mapToUserResponse(user, userTimeZone))
