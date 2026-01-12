@@ -19,6 +19,7 @@ public class SecurityConfig {
                                         "/api/v1/auth/admin/register",
                                         "/api/v1/auth/register").
                                 permitAll()
+                                .pathMatchers("/api/v1/events/create").hasRole("ADMIN")
                                 .anyExchange().authenticated())
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();

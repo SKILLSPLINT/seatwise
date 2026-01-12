@@ -1,4 +1,4 @@
-package com.seatwise.user_service.dto.response;
+package dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,14 +11,14 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponse<T> {
+public class BaseResponse<T> {
     private boolean success;
     private String message;
     private T data;
     private Instant timestamp;
 
-    public static <T> ApiResponse<T> success(T data) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> success(T data) {
+        return BaseResponse.<T>builder()
                 .success(true)
                 .message("Operation successful")
                 .data(data)
@@ -26,8 +26,8 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> success(String message, T data) {
+        return BaseResponse.<T>builder()
                 .success(true)
                 .message(message)
                 .data(data)
