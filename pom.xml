@@ -27,6 +27,7 @@
         <module>event-service</module>
         <module>notification-service</module>
         <module>user-service</module>
+        <module>file-service</module>
     </modules>
 
     <properties>
