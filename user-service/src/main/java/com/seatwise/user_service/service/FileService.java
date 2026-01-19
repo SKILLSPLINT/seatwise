@@ -32,5 +32,7 @@ public interface FileService {
      * @param fileId The file ID
      */
     void deleteFile(UUID fileId);
+
+    String presSignedUrl(String category,String filename);
 }
 

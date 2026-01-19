@@ -26,6 +26,11 @@ spring:
 admin:
   secret-key: ${ADMIN_SECRET_KEY:default-admin-secret-key-change-in-production}
 
+# Service Discovery URLs (using Eureka load-balanced URLs)
+services:
+  file-service:
+    url: http://FILE-SERVICE
+
 # Swagger/OpenAPI Configuration
 springdoc:
   api-docs:

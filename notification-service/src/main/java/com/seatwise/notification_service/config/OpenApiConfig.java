@@ -1,4 +1,4 @@
-package com.seatwise.user_service.config;
+package com.seatwise.notification_service.config;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -25,16 +25,16 @@ import java.util.List;
 )
 public class OpenApiConfig {
 
-    @Value("${server.port:9091}")
+    @Value("${server.port:9093}")
     private String serverPort;
 
     @Bean
-    public OpenAPI customOpenAPI() {
+    public OpenAPI notificationServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("SeatWise User Service API")
+                        .title("SeatWise Notification Service API")
                         .version("1.0.0")
-                        .description("RESTful API for user management, authentication, and profile management in SeatWise microservices architecture")
+                        .description("RESTful API for notification management, email, SMS, and push notifications in SeatWise microservices architecture")
                         .contact(new Contact()
                                 .name("SeatWise Team")
                                 .email("support@seatwise.com"))
@@ -46,8 +46,8 @@ public class OpenApiConfig {
                                 .url("http://localhost:" + serverPort)
                                 .description("Local Development Server"),
                         new Server()
-                                .url("http://localhost:9090" )
-                                .description("api gateway Development Server"),
+                                .url("http://localhost:9090")
+                                .description("API Gateway"),
                         new Server()
                                 .url("https://api.seatwise.com")
                                 .description("Production Server")
@@ -60,4 +60,3 @@ public class OpenApiConfig {
                                 .bearerFormat("JWT")));
     }
 }
-

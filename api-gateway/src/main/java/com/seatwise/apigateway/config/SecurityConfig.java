@@ -17,7 +17,16 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges ->
                         exchanges.pathMatchers("/api/v1/auth/login",
                                         "/api/v1/auth/admin/register",
-                                        "/api/v1/auth/register").
+                                        "/api/v1/auth/register",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**",
+                                        "/webjars/**",
+                                        "/user-service/api-docs/**",
+                                        "/event-service/api-docs/**",
+                                        "/file-service/api-docs/**",
+                                        "/booking-service/api-docs/**",
+                                        "/notification-service/api-docs/**").
                                 permitAll()
                                 .pathMatchers("/api/v1/events/create").hasRole("ADMIN")
                                 .anyExchange().authenticated())

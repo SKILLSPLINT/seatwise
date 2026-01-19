@@ -9,6 +9,7 @@ spring:
       server:
         webflux:
           routes:
+            # API Routes
             - id: user-service
               uri: lb://USER-SERVICE
               predicates:
@@ -17,6 +18,57 @@ spring:
               uri: lb://EVENT-SERVICE
               predicates:
                 - Path=/api/v1/events/**
+            - id: file-service
+              uri: lb://FILE-SERVICE
+              predicates:
+                - Path=/api/v1/files/**
+            # Swagger/OpenAPI Routes for each service
+            - id: user-service-api-docs
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/api-docs/**
+              filters:
+                - RewritePath=/user-service/api-docs(?<segment>.*), /api-docs${segment}
+            - id: event-service-api-docs
+              uri: lb://EVENT-SERVICE
+              predicates:
+                - Path=/event-service/api-docs/**
+              filters:
+                - RewritePath=/event-service/api-docs(?<segment>.*), /api-docs${segment}
+            - id: file-service-api-docs
+              uri: lb://FILE-SERVICE
+              predicates:
+                - Path=/file-service/api-docs/**
+              filters:
+                - RewritePath=/file-service/api-docs(?<segment>.*), /api-docs${segment}
+            - id: booking-service-api-docs
+              uri: lb://BOOKING-SERVICE
+              predicates:
+                - Path=/booking-service/api-docs/**
+              filters:
+                - RewritePath=/booking-service/api-docs(?<segment>.*), /api-docs${segment}
+            - id: notification-service-api-docs
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/notification-service/api-docs/**
+              filters:
+                - RewritePath=/notification-service/api-docs(?<segment>.*), /api-docs${segment}
+
+# Springdoc OpenAPI Configuration - Aggregated Swagger UI
+springdoc:
+  swagger-ui:
+    urls:
+      - name: User Service
+        url: /user-service/api-docs
+      - name: Event Service
+        url: /event-service/api-docs
+      - name: File Service
+        url: /file-service/api-docs
+      - name: Booking Service
+        url: /booking-service/api-docs
+      - name: Notification Service
+        url: /notification-service/api-docs
+
 logging:
   level:
     root: INFO

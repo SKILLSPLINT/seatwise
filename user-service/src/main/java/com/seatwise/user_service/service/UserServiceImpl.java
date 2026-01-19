@@ -1,6 +1,7 @@
 package com.seatwise.user_service.service;
 
 import com.seatwise.user_service.Utils.JwtUtils;
+import enums.EFileCategory;
 import enums.ERole;
 import exception.BadRequestException;
 import exception.ConflictException;
@@ -230,11 +231,10 @@ public class UserServiceImpl implements UserService {
         Set<String> roleNames = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
-
         String profileImageUrl = null;
         if (user.getProfileImage() != null) {
             // TODO: Build actual URL when file-service Docker container is implemented
-            profileImageUrl = "/api/v1/files/" + user.getProfileImage().getId();
+            profileImageUrl = fileService.presSignedUrl(EFileCategory.PROFILE.getValue(),user.getProfileImage().getName());
         }
 
         // Convert UTC timestamps to user's timezone

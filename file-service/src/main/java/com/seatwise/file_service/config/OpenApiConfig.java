@@ -1,4 +1,4 @@
-package com.seatwise.user_service.config;
+package com.seatwise.file_service.config;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -6,10 +6,8 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,32 +23,20 @@ import java.util.List;
 )
 public class OpenApiConfig {
 
-    @Value("${server.port:9091}")
-    private String serverPort;
-
     @Bean
-    public OpenAPI customOpenAPI() {
+    public OpenAPI fileServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("SeatWise User Service API")
+                        .title("File Service API")
+                        .description("REST API for file upload, download, and management using MinIO storage")
                         .version("1.0.0")
-                        .description("RESTful API for user management, authentication, and profile management in SeatWise microservices architecture")
                         .contact(new Contact()
                                 .name("SeatWise Team")
-                                .email("support@seatwise.com"))
-                        .license(new License()
-                                .name("Apache 2.0")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
+                                .email("support@seatwise.com")))
                 .servers(List.of(
-                        new Server()
-                                .url("http://localhost:" + serverPort)
-                                .description("Local Development Server"),
-                        new Server()
-                                .url("http://localhost:9090" )
-                                .description("api gateway Development Server"),
-                        new Server()
-                                .url("https://api.seatwise.com")
-                                .description("Production Server")
+                        new Server().url("http://localhost:9095").description("Local Development"),
+                        new Server().url("http://localhost:9090").description("API Gateway"),
+                        new Server().url("http://file-service:9095").description("Docker Environment")
                 ))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new Components()
@@ -60,4 +46,3 @@ public class OpenApiConfig {
                                 .bearerFormat("JWT")));
     }
 }
-
