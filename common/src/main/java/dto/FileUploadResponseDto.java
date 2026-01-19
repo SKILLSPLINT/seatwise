@@ -1,4 +1,4 @@
-package com.seatwise.user_service.dto.response;
+package dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,5 +1,6 @@
 package com.seatwise.event_service.controller;
 
+import com.seatwise.event_service.dto.request.CreateEventFormData;
 import com.seatwise.event_service.dto.request.CreateEventRequest;
 import com.seatwise.event_service.dto.request.UpdateEventRequest;
 import com.seatwise.event_service.dto.response.EventDetailResponseDto;
@@ -9,8 +10,13 @@ import com.seatwise.event_service.service.EventService;
 import dto.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,8 +25,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -31,36 +39,67 @@ import java.util.UUID;
 public class EventController {
     private final EventService eventService;
 
-    @PostMapping
-    @Operation(summary = "Create a new event", description = "Creates a new event with seats")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Create a new event",
+            description = "Creates a new event with seats and optional image. Send 'event' as JSON and 'image' as file.",
+            requestBody = @RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = CreateEventFormData.class),
+                            encoding = {
+                                    @Encoding(name = "event", contentType = MediaType.APPLICATION_JSON_VALUE)
+                            }
+                    )
+            ),
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Event created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     public ResponseEntity<BaseResponse<EventResponseDto>> createEvent(
-            @Valid @RequestBody CreateEventRequest dto, HttpServletRequest request
+            @RequestPart("event") @Valid CreateEventRequest dto,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            HttpServletRequest request
     ) {
         String userTimeZone = request.getHeader("time-zone");
-        EventResponseDto eventResponse = eventService.createEvent(dto, userTimeZone);
+        EventResponseDto eventResponse = eventService.createEvent(dto, image, userTimeZone);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 BaseResponse.success("Event created successfully", eventResponse)
         );
     }
 
     @PutMapping("/{eventId}")
-    @Operation(summary = "Update an event", description = "Updates an existing event. If totalSeats is changed, seats will be recreated.")
+    @Operation(
+            summary = "Update an event",
+            description = "Updates an existing event. If totalSeats is changed, seats will be recreated.",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            requestBody = @RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = CreateEventFormData.class),
+                            encoding = {
+                                    @Encoding(name = "event", contentType = MediaType.APPLICATION_JSON_VALUE)
+                            }
+                    )
+            )
+
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Event updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "404", description = "Event not found")
+            @ApiResponse(responseCode = "404", description = "Event not found"),
+
     })
     public ResponseEntity<BaseResponse<EventResponseDto>> updateEvent(
             @Parameter(description = "Event ID", required = true) @PathVariable UUID eventId,
-            @Valid @RequestBody UpdateEventRequest dto,
+            @RequestPart("event") @Valid UpdateEventRequest dto,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             HttpServletRequest request
     ) {
         String userTimeZone = request.getHeader("time-zone");
-        EventResponseDto eventResponse = eventService.updateEvent(eventId, dto, userTimeZone);
+        EventResponseDto eventResponse = eventService.updateEvent(eventId, dto, userTimeZone,image);
         return ResponseEntity.ok(
                 BaseResponse.success("Event updated successfully", eventResponse)
         );
@@ -98,7 +137,11 @@ public class EventController {
     }
 
     @DeleteMapping("/{eventId}")
-    @Operation(summary = "Delete event", description = "Deletes an event and all its related seats and image")
+    @Operation(
+            summary = "Delete event",
+            description = "Deletes an event and all its related seats and image",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Event deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Event not found")

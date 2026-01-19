@@ -2,6 +2,7 @@ package com.seatwise.apigateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -18,6 +19,7 @@ public class SecurityConfig {
                         exchanges.pathMatchers("/api/v1/auth/login",
                                         "/api/v1/auth/admin/register",
                                         "/api/v1/auth/register",
+//                                        swagger
                                         "/swagger-ui.html",
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**",
@@ -28,7 +30,11 @@ public class SecurityConfig {
                                         "/booking-service/api-docs/**",
                                         "/notification-service/api-docs/**").
                                 permitAll()
-                                .pathMatchers("/api/v1/events/create").hasRole("ADMIN")
+                                .pathMatchers(HttpMethod.POST, "/api/v1/events").hasRole("ADMIN")
+                                .pathMatchers(HttpMethod.PUT, "/api/v1/events/").hasRole("ADMIN")
+                                .pathMatchers(HttpMethod.DELETE, "/api/v1/events/").hasRole("ADMIN")
+                                .pathMatchers(HttpMethod.GET,"/api/v1/events").permitAll()
+                                .pathMatchers(HttpMethod.GET,"/api/v1/events/**").permitAll()
                                 .anyExchange().authenticated())
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();

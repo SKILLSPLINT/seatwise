@@ -58,3 +58,6 @@ seat:
   release:
     interval: 1800000 #cron job run every 30 minutes
     timeout: 1800 # seat expires after 30 min
+services:
+  file-service:
+    url: http://FILE-SERVICE

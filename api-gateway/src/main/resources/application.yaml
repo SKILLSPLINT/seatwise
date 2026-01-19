@@ -53,6 +53,11 @@ spring:
                 - Path=/notification-service/api-docs/**
               filters:
                 - RewritePath=/notification-service/api-docs(?<segment>.*), /api-docs${segment}
+          default-filters:
+            - name: Retry
+              args:
+                retries: 3
+                statuses: SERVICE_UNAVAILABLE,NOT_FOUND
 
 # Springdoc OpenAPI Configuration - Aggregated Swagger UI
 springdoc:
@@ -80,6 +85,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
+    registry-fetch-interval-seconds: 5
 
   instance:
     prefer-ip-address: true #user ip address

@@ -1,12 +1,12 @@
-package com.seatwise.user_service.service;
+package com.seatwise.event_service.service;
 
-import com.seatwise.user_service.client.FileServiceClient;
+import com.seatwise.event_service.client.FileServiceClient;
+import com.seatwise.event_service.model.File;
+import com.seatwise.event_service.repository.FileRepository;
 import dto.FileUploadResponseDto;
 import enums.EFileSizeType;
 import enums.EFileStatus;
 import exception.ResourceNotFoundException;
-import com.seatwise.user_service.model.File;
-import com.seatwise.user_service.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,11 +23,6 @@ public class FileServiceImpl implements FileService {
     private final FileRepository fileRepository;
     private final FileServiceClient fileServiceClient;
 
-    @Override
-    @Transactional
-    public File saveFile(MultipartFile multipartFile) {
-        return saveFile(multipartFile, "profile");
-    }
 
     @Transactional
     public File saveFile(MultipartFile multipartFile, String category) {
@@ -83,29 +78,6 @@ public class FileServiceImpl implements FileService {
                 });
     }
 
-    @Override
-    @Transactional
-    public void deleteFile(UUID fileId) {
-        log.info("FileService.deleteFile() called - File ID: {}", fileId);
-
-        File file = getFileById(fileId);
-
-        try {
-            String category = extractCategoryFromPath(file.getPath());
-            String filename = extractFilenameFromPath(file.getPath());
-
-            fileServiceClient.deleteFile(category, filename);
-
-            file.setStatus(EFileStatus.DELETED);
-            fileRepository.save(file);
-
-            log.info("File deleted from storage and marked as DELETED - File ID: {}", fileId);
-
-        } catch (Exception e) {
-            log.error("Failed to delete file from storage: {} - Error: {}", fileId, e.getMessage());
-            throw new RuntimeException("Failed to delete file from storage service", e);
-        }
-    }
 
     @Override
     public String presSignedUrl(String category, String filename) {

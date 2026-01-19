@@ -1,0 +1,32 @@
+package com.seatwise.event_service.service;
+
+import com.seatwise.event_service.model.File;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
+
+/**
+ * FileService interface for handling file operations.
+ * Currently, logs operations as placeholder for future Docker container implementation.
+ */
+public interface FileService {
+    /**
+     * Save a file (currently logs only will be stored in a Docker container later)
+     *
+     * @param multipartFile The file to save
+     * @return File entity with metadata
+     */
+    File saveFile(MultipartFile multipartFile,String category);
+
+    /**
+     * Get file by ID (currently logs only)
+     *
+     * @param fileId The file ID
+     * @return File entity
+     */
+    File getFileById(UUID fileId);
+
+
+    String presSignedUrl(String category,String filename);
+}
+

@@ -50,6 +50,8 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
+    healthcheck:
+      enabled: true
 
   instance:
     prefer-ip-address: true #user ip address

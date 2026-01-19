@@ -233,7 +233,6 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toSet());
         String profileImageUrl = null;
         if (user.getProfileImage() != null) {
-            // TODO: Build actual URL when file-service Docker container is implemented
             profileImageUrl = fileService.presSignedUrl(EFileCategory.PROFILE.getValue(),user.getProfileImage().getName());
         }
 

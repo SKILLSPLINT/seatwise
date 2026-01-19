@@ -6,9 +6,11 @@ import com.seatwise.event_service.dto.response.EventDetailResponseDto;
 import com.seatwise.event_service.dto.response.EventResponseDto;
 import com.seatwise.event_service.dto.response.SeatResponseDto;
 import com.seatwise.event_service.model.Event;
+import com.seatwise.event_service.model.File;
 import com.seatwise.event_service.model.Seat;
 import com.seatwise.event_service.repository.EventRepository;
 import com.seatwise.event_service.repository.SeatRepository;
+import enums.EFileCategory;
 import enums.ESeat;
 import exception.BadRequestException;
 import exception.ConflictException;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import utils.TimeUtils;
 
 import java.time.Instant;
@@ -35,16 +38,31 @@ import java.util.stream.Collectors;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepo;
     private final SeatRepository seatRepo;
+    private final FileService fileService;
 
     @Value("${seat.release.timeout}")
     private String RESERVATION_TIMEOUT;
 
     @Override
     @Transactional
-    public EventResponseDto createEvent(CreateEventRequest dto, String userTimeZone) {
+    public EventResponseDto createEvent(CreateEventRequest dto, MultipartFile image, String userTimeZone) {
         log.info("Creating new event: {}", dto.getName());
 
-        Event event = buildEventFromDto(dto, userTimeZone, null);
+        File file = new File();
+        // Log file info if an image is provided
+        if (image != null && !image.isEmpty()) {
+            try {
+                file = fileService.saveFile(image, EFileCategory.EVENTS.getValue());
+                log.info("image saved successfully - File ID: {} ", file.getId());
+            } catch (Exception e) {
+                log.error("Error saving image: {}", e.getMessage());
+                throw new BadRequestException("Failed to save profile picture: " + e.getMessage());
+            }
+        } else {
+            log.info("No image provided for event");
+        }
+
+        Event event = buildEventFromDto(dto, userTimeZone, null, file);
 
         // Create seats and add to event (cascade will save them)
         createSeatsForEvent(event, dto.getTotalSeats());
@@ -58,7 +76,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventResponseDto updateEvent(UUID eventId, UpdateEventRequest dto, String userTimeZone) {
+    public EventResponseDto updateEvent(UUID eventId, UpdateEventRequest dto, String userTimeZone, MultipartFile image) {
         log.info("Updating event with ID: {}", eventId);
 
         Event existingEvent = eventRepo.findById(eventId)
@@ -80,7 +98,13 @@ public class EventServiceImpl implements EventService {
 
         // Update event fields using reusable method
         updateEventFromDto(existingEvent, dto, userTimeZone);
-
+        try {
+            File file = fileService.saveFile(image, EFileCategory.EVENTS.getValue());
+            existingEvent.setImage(file);
+            log.info("image saved successfully - File ID: {} ", file.getId());
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to save profile picture: " + e.getMessage());
+        }
         Event updatedEvent = eventRepo.save(existingEvent);
         log.info("Event updated successfully with ID: {}", updatedEvent.getId());
 
@@ -208,7 +232,7 @@ public class EventServiceImpl implements EventService {
     /**
      * Reusable method to build Event entity from DTO (for creation)
      */
-    private Event buildEventFromDto(CreateEventRequest dto, String userTimeZone, Event existingEvent) {
+    private Event buildEventFromDto(CreateEventRequest dto, String userTimeZone, Event existingEvent, File file) {
         Event event = existingEvent != null ? existingEvent : new Event();
 
         event.setName(dto.getName());
@@ -217,6 +241,7 @@ public class EventServiceImpl implements EventService {
         event.setVenue(dto.getVenue());
         event.setTotalSeats(dto.getTotalSeats());
         event.setAvailableSeats(dto.getTotalSeats());
+        event.setImage(file);
 
         // Convert local datetime to Instant (UTC)
         ZoneId zone = ZoneId.of(userTimeZone != null && !userTimeZone.isBlank()
@@ -287,8 +312,10 @@ public class EventServiceImpl implements EventService {
 
         String imageUrl = null;
         if (event.getImage() != null) {
-            // Build URL for event image
-            imageUrl = "/api/v1/files/" + event.getImage().getId();
+            String filename = getFilenameFromFile(event.getImage());
+            if (filename != null && !filename.isEmpty()) {
+                imageUrl = fileService.presSignedUrl(EFileCategory.EVENTS.getValue(), filename);
+            }
         }
 
         return EventResponseDto.builder()
@@ -312,7 +339,10 @@ public class EventServiceImpl implements EventService {
     private EventDetailResponseDto mapToEventDetailResponseDto(Event event, String userTimeZone) {
         String imageUrl = null;
         if (event.getImage() != null) {
-            imageUrl = "/api/v1/files/" + event.getImage().getId();
+            String filename = getFilenameFromFile(event.getImage());
+            if (filename != null && !filename.isEmpty()) {
+                imageUrl = fileService.presSignedUrl(EFileCategory.EVENTS.getValue(), filename);
+            }
         }
 
         // Map seats to SeatResponseDto
@@ -357,5 +387,20 @@ public class EventServiceImpl implements EventService {
                 .createdAt(TimeUtils.toUserOrUtc(seat.getCreatedAt(), userTimeZone))
                 .updatedAt(TimeUtils.toUserOrUtc(seat.getUpdatedAt(), userTimeZone))
                 .build();
+    }
+
+    /**
+     * Extracts filename from the File entity.
+     * Tries getName() first, falls back to extracting from path if null.
+     */
+    private String getFilenameFromFile(File file) {
+        if (file.getName() != null && !file.getName().isEmpty()) {
+            return file.getName();
+        }
+        // Fallback: extract filename from path (e.g., "events/uuid.jpeg" -> "uuid.jpeg")
+        if (file.getPath() != null && file.getPath().contains("/")) {
+            return file.getPath().substring(file.getPath().lastIndexOf("/") + 1);
+        }
+        return file.getPath();
     }
 }

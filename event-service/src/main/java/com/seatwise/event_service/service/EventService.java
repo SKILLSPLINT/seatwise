@@ -7,13 +7,14 @@ import com.seatwise.event_service.dto.response.EventResponseDto;
 import com.seatwise.event_service.dto.response.SeatResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
 public interface EventService {
-    EventResponseDto createEvent(CreateEventRequest dto, String userTimeZone);
+    EventResponseDto createEvent(CreateEventRequest dto, MultipartFile image, String userTimeZone);
 
-    EventResponseDto updateEvent(UUID eventId, UpdateEventRequest dto, String userTimeZone);
+    EventResponseDto updateEvent(UUID eventId, UpdateEventRequest dto, String userTimeZone, MultipartFile image);
 
     Page<EventResponseDto> getAllEvents(Pageable pageable, String userTimeZone);
 
