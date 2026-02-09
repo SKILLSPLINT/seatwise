@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -48,7 +49,9 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "Get all notifications", description = "Retrieve all notifications for a user with pagination")
+    @Operation(summary = "Get all notifications",
+            description = "Retrieve all notifications for a user with pagination",
+            security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Notifications retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid user ID", content = @Content),
@@ -68,7 +71,11 @@ public class NotificationController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get notification by ID", description = "Retrieve a specific notification by its ID")
+    @Operation(summary = "Get notification by ID",
+            description = "Retrieve a specific notification by its ID",
+            security = @SecurityRequirement(name = "bearerAuth")
+
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Notification retrieved successfully", content = @Content(schema = @Schema(implementation = NotificationResponse.class))),
             @ApiResponse(responseCode = "404", description = "Notification not found", content = @Content),
@@ -82,7 +89,12 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}/read")
-    @Operation(summary = "Get read notifications", description = "Retrieve all read notifications for a user with pagination")
+    @Operation(
+            summary = "Get read notifications",
+            description = "Retrieve all read notifications for a user with pagination",
+            security = @SecurityRequirement(name = "bearerAuth")
+
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Read notifications retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid user ID", content = @Content),
@@ -102,7 +114,12 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}/unread")
-    @Operation(summary = "Get unread notifications", description = "Retrieve all unread notifications for a user with pagination")
+    @Operation(
+            summary = "Get unread notifications",
+            description = "Retrieve all unread notifications for a user with pagination",
+            security = @SecurityRequirement(name = "bearerAuth")
+
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Unread notifications retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid user ID", content = @Content),
@@ -122,7 +139,12 @@ public class NotificationController {
     }
 
     @PatchMapping("/{id}/read")
-    @Operation(summary = "Mark notification as read", description = "Mark a specific notification as read")
+    @Operation(
+            summary = "Mark notification as read",
+            description = "Mark a specific notification as read",
+            security = @SecurityRequirement(name = "bearerAuth")
+
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Notification marked as read", content = @Content(schema = @Schema(implementation = NotificationResponse.class))),
             @ApiResponse(responseCode = "404", description = "Notification not found", content = @Content),
@@ -136,7 +158,11 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}/search")
-    @Operation(summary = "Search notifications", description = "Search notifications by keyword, type, and read status")
+    @Operation(
+            summary = "Search notifications",
+            description = "Search notifications by keyword, type, and read status",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Search completed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
@@ -159,7 +185,11 @@ public class NotificationController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete notification", description = "Delete a specific notification by its ID")
+    @Operation(summary = "Delete notification",
+            description = "Delete a specific notification by its ID",
+            security = @SecurityRequirement(name = "bearerAuth")
+
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Notification deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Notification not found", content = @Content),
