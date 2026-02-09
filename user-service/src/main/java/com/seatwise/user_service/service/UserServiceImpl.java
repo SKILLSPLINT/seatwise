@@ -1,6 +1,7 @@
 package com.seatwise.user_service.service;
 
 import com.seatwise.user_service.Utils.JwtUtils;
+import dto.EmailPayload;
 import enums.EFileCategory;
 import enums.ERole;
 import exception.BadRequestException;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileService fileService;
+    private final EmailProducer emailProducer;
 
     @Value("${admin.secret-key}")
     private String adminSecretKey;
@@ -66,6 +68,13 @@ public class UserServiceImpl implements UserService {
         user.getRoles().add(userRole);
 
         User savedUser = userRepository.save(user);
+        EmailPayload emailPayload = EmailPayload.builder()
+                .subject("Account Registration")
+                .body("Thank you for registering with SeatWise. We look aboard for you")
+                .recipient(user.getEmail())
+                .sender("seatwise@gmail.com")
+                .build();
+        emailProducer.sendEmailNotification(user.getId(), emailPayload);
 
         return mapToUserResponse(savedUser, userTimeZone);
     }
@@ -97,6 +106,13 @@ public class UserServiceImpl implements UserService {
         }
         assert lastAdded != null;
         String token = JwtUtils.generateToken(user.getId(), lastAdded.getName(), user.getEmail());
+        EmailPayload emailPayload = EmailPayload.builder()
+                .subject(" Login to SeatWise")
+                .body("We detect new login  to your account on SeatWise")
+                .recipient(user.getEmail())
+                .sender("seatwise@gmail.com")
+                .build();
+        emailProducer.sendEmailNotification(user.getId(), emailPayload);
         return LoginResponse.builder()
                 .token(token)
                 .user(mapToUserResponse(user, userTimeZone))
@@ -233,7 +249,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toSet());
         String profileImageUrl = null;
         if (user.getProfileImage() != null) {
-            profileImageUrl = fileService.presSignedUrl(EFileCategory.PROFILE.getValue(),user.getProfileImage().getName());
+            profileImageUrl = fileService.presSignedUrl(EFileCategory.PROFILE.getValue(), user.getProfileImage().getName());
         }
 
         // Convert UTC timestamps to user's timezone

@@ -37,10 +37,10 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user", description = "Registers a new user account. Profile picture can be uploaded separately using the profile picture upload endpoint.")
+    @Operation(summary = "Create notification", description = "Create notification")
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User registered successfully", content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "201", description = "notification created successfully", content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
             @ApiResponse(responseCode = "409", description = "Email or phone number already exists", content = @Content)
     })

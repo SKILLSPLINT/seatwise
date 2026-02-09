@@ -21,7 +21,22 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
-
+  rabbitmq:
+    username: admin
+    password: admin123
+    host: localhost
+    port: 5672
+    template:
+      mandatory: true
+      receive-timeout: 50000
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-retries: 3
+          multiplier: 2
+        acknowledge-mode: auto
 # Admin Configuration
 admin:
   secret-key: ${ADMIN_SECRET_KEY:default-admin-secret-key-change-in-production}
@@ -30,6 +45,8 @@ admin:
 services:
   file-service:
     url: http://FILE-SERVICE
+  notification-service:
+    url: http://NOTIFICATION-SERVICE
 
 # Swagger/OpenAPI Configuration
 springdoc:
@@ -44,6 +61,7 @@ logging:
     root: INFO
     org.springframework: INFO
     com.seatwise: DEBUG
+    org.springframework.amqp: INFO
 eureka:
   client:
     service-url:
