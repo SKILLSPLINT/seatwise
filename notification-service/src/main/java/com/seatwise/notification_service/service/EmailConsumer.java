@@ -27,8 +27,10 @@ public class EmailConsumer {
 
     @RabbitListener(queues = RabbitConstants.EMAIL_QUEUE)
     public void consumeEmail(Message message) throws JsonProcessingException {
+        log.info("Received email message from RabbitMQ queue: {}", RabbitConstants.EMAIL_QUEUE);
         int retries = (int) message.getMessageProperties().getHeaders().getOrDefault("x-retries", 0);
         EmailPayload payload = objectMapper.readValue(new String(message.getBody()), EmailPayload.class);
+        log.info("Processing email for notificationId: {}", payload.getNotificationId());
         Notification notification = notificationRepo.findById(payload.getNotificationId()).orElseThrow();
 
         try {

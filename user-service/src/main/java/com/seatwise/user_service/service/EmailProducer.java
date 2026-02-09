@@ -7,6 +7,7 @@ import constants.RabbitConstants;
 import dto.NotificationRequest;
 import enums.ENotificationType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailProducer {
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
@@ -38,8 +40,10 @@ public class EmailProducer {
             payload.setNotificationId(notificationResponse.getId());
             Message message = new Message(objectMapper.writeValueAsString(payload).getBytes(), props);
             rabbitTemplate.send(RabbitConstants.EMAIL_EXCHANGE, RabbitConstants.EMAIL_ROUTING_KEY, message);
+            log.info("Email message sent to RabbitMQ: exchange={}, routingKey={}, notificationId={}",
+                    RabbitConstants.EMAIL_EXCHANGE, RabbitConstants.EMAIL_ROUTING_KEY, notificationResponse.getId());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to send email notification to RabbitMQ", e);
         }
     }
 }

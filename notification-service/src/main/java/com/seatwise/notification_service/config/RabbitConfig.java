@@ -39,6 +39,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    TopicExchange emailDeadLetterExchange() {
+        return new TopicExchange(RabbitConstants.EMAIL_DLX);
+    }
+
+    @Bean
     public Queue emailQueue() {
         return QueueBuilder.durable(RabbitConstants.EMAIL_QUEUE)
                 .withArgument("x-dead-letter-exchange", RabbitConstants.EMAIL_DLX)
@@ -110,7 +115,7 @@ public class RabbitConfig {
     @Bean
     public Binding emailDlqBinding() {
         return BindingBuilder.bind(emailDlq())
-                .to(deadLetterExchange())
+                .to(emailDeadLetterExchange())
                 .with(RabbitConstants.EMAIL_DLQ_ROUTING_KEY);
     }
 }
