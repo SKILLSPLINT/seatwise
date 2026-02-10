@@ -391,13 +391,13 @@ public class EventServiceImpl implements EventService {
 
     /**
      * Extracts filename from the File entity.
-     * Tries getName() first, falls back to extracting from path if null.
+     * Tries getName() first, falls back to extracting from a path if null.
      */
     private String getFilenameFromFile(File file) {
         if (file.getName() != null && !file.getName().isEmpty()) {
             return file.getName();
         }
-        // Fallback: extract filename from path (e.g., "events/uuid.jpeg" -> "uuid.jpeg")
+        // Fallback: extract filename from a path (e.g., "events/uuid.jpeg" -> "uuid.jpeg")
         if (file.getPath() != null && file.getPath().contains("/")) {
             return file.getPath().substring(file.getPath().lastIndexOf("/") + 1);
         }

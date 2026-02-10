@@ -35,6 +35,9 @@ public class SecurityConfig {
                                 .pathMatchers(HttpMethod.DELETE, "/api/v1/events/").hasRole("ADMIN")
                                 .pathMatchers(HttpMethod.GET,"/api/v1/events").permitAll()
                                 .pathMatchers(HttpMethod.GET,"/api/v1/events/**").permitAll()
+                                // Booking service security
+                                .pathMatchers(HttpMethod.GET, "/api/v1/bookings").hasRole("ADMIN")
+                                .pathMatchers("/api/v1/bookings/**").authenticated()
                                 .anyExchange().authenticated())
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
