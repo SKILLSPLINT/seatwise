@@ -1,0 +1,44 @@
+services:
+  redis:
+    image: redis:7.2
+    container_name: redis-prod
+    restart: always
+
+    command: >
+      sh -c "
+      redis-server /usr/local/etc/redis/redis.conf
+      "
+
+    ports:
+      - "6378:6379"
+
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./users.acl:/usr/local/etc/redis/users.acl:ro
+
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+    deploy:
+      resources:
+        limits:
+          memory: 2500m
+        reservations:
+          memory: 1g
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+    sysctls:
+      net.core.somaxconn: 1024
+
+volumes:
+  redis_data:
+    driver: local
+networks:
+  seatwise:
+    external: true

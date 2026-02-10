@@ -11,3 +11,6 @@ services:
     volumes:
       - ${MINIO_STORAGE_PATH}:/data
     command: server /data --console-address ":9002"
+networks:
+  seatwise:
+    external: true
