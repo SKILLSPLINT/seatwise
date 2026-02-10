@@ -42,11 +42,7 @@ public class BookingController {
             @ApiResponse(responseCode = "409", description = "Booking already exists for this seat")
     })
     public ResponseEntity<BaseResponse<BookingResponseDto>> createBooking(
-            @Parameter(
-                    description = "Authenticated user ID (passed from API Gateway)",
-                    required = true,
-                    example = "c1a2f3d4-5678-4abc-9def-1234567890ab"
-            )
+            @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID userId,
 
             @Parameter(
@@ -75,12 +71,7 @@ public class BookingController {
             @ApiResponse(responseCode = "403", description = "Forbidden - admin role required")
     })
     public ResponseEntity<BaseResponse<Page<BookingResponseDto>>> getAllBookings(
-            @Parameter(
-                    description = "User role (passed from API Gateway)",
-                    required = true,
-                    example = "ADMIN"
-            )
-            @RequestHeader("X-User-Role") String userRole,
+            @Parameter(hidden = true) @RequestHeader("X-User-Role") String userRole,
 
             @Parameter(
                     description = "User time zone (e.g., Africa/Kigali, Europe/London)",
@@ -107,12 +98,7 @@ public class BookingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - valid JWT token required")
     })
     public ResponseEntity<BaseResponse<Page<BookingResponseDto>>> getMyBookings(
-            @Parameter(
-                    description = "Authenticated user ID (passed from API Gateway)",
-                    required = true,
-                    example = "c1a2f3d4-5678-4abc-9def-1234567890ab"
-            )
-            @RequestHeader("X-User-Id") UUID userId,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId,
 
             @Parameter(
                     description = "User time zone (e.g., Africa/Kigali, Europe/London)",
@@ -170,12 +156,7 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     public ResponseEntity<BaseResponse<BookingResponseDto>> confirmBooking(
-            @Parameter(
-                    description = "Authenticated user ID (passed from API Gateway)",
-                    required = true,
-                    example = "c1a2f3d4-5678-4abc-9def-1234567890ab"
-            )
-            @RequestHeader("X-User-Id") UUID userId,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId,
 
             @Parameter(
                     description = "User time zone (e.g., Africa/Kigali, Europe/London)",
