@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public interface EventService {
@@ -25,4 +26,6 @@ public interface EventService {
     SeatResponseDto reserveSeat(UUID seatId, UUID userId, String userTimeZone);
 
     SeatResponseDto confirmSeat(UUID seatId,UUID userId, String userTimeZone);
+
+    Page<EventResponseDto> search(String query, String venueName, Instant fromTime, Instant toTime, Integer minAvailableSeats, Pageable pageable, String userTimeZone);
 }

@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### Environment Files (secrets) ###
-.env
+file-service/.env
 *.env.local

@@ -1,5 +1,6 @@
 package com.seatwise.event_service.service;
 
+import com.seatwise.event_service.dto.EventSpecifications;
 import com.seatwise.event_service.dto.request.CreateEventRequest;
 import com.seatwise.event_service.dto.request.UpdateEventRequest;
 import com.seatwise.event_service.dto.response.EventDetailResponseDto;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -190,6 +192,18 @@ public class EventServiceImpl implements EventService {
         }
         seat.setStatus(ESeat.BOOKED);
         return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone);
+    }
+
+    @Override
+    public Page<EventResponseDto> search(String query, String venueName, Instant fromTime, Instant toTime, Integer minAvailableSeats, Pageable pageable, String userTimeZone) {
+        Specification<Event> spec = Specification
+                .where(EventSpecifications.textSearch(query))
+                .and(EventSpecifications.venueNameContains(venueName))
+                .and(EventSpecifications.timeBetween(fromTime, toTime))
+                .and(EventSpecifications.minAvailableSeats(minAvailableSeats));
+        Page<Event> eventsPage = eventRepo.findAll(spec, pageable);
+
+        return eventsPage.map(event -> mapToEventResponseDto(event, userTimeZone));
     }
 
 

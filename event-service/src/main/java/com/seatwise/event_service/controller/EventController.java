@@ -21,8 +21,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,8 +33,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/events")
 @RequiredArgsConstructor
@@ -245,4 +250,92 @@ public class EventController {
         );
     }
 
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search event ",
+            description = "Search event "
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Event found  successfully"),
+            @ApiResponse(responseCode = "404", description = "Event not found "),
+    })
+    public ResponseEntity<BaseResponse<Page<EventResponseDto>>> searchEvents(
+            @RequestParam(required = false) String query,      // full-text search
+            @RequestParam(required = false) String venueName,
+            @RequestParam(required = false) Instant fromTime,
+            @RequestParam(required = false) Instant toTime,
+            @RequestParam(required = false) Integer minAvailableSeats,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "time,desc") String[] sort,
+            @Parameter(
+                    description = "User time zone (e.g., Africa/Kigali, Europe/London)",
+                    example = "Africa/Kigali"
+            )
+            @RequestHeader(value = "time-zone", required = false) String userTimeZone
+
+    ) {
+        log.info("Received sort parameter: {}", Arrays.toString(sort));
+        Pageable pageable = PageRequest.of(page, size, (parseSort(sort)));
+        Page<EventResponseDto> events = eventService.search(query,venueName,fromTime,toTime,minAvailableSeats,pageable,userTimeZone);
+        return ResponseEntity.ok(
+                BaseResponse.success("Seat confirmed successfully",events)
+        );
+    }
+
+
+    private Sort parseSort(String[] sortParams) {
+        if (sortParams == null || sortParams.length == 0) {
+            return Sort.by(Sort.Order.desc("time")); // explicit default
+        }
+
+        List<Sort.Order> orders = new ArrayList<>();
+
+        // If there's exactly one parameter, and it contains a comma, split it.
+        if (sortParams.length == 1 && sortParams[0].contains(",")) {
+            String[] parts = sortParams[0].split(",");
+            if (parts.length == 2) {
+                return buildOrder(parts[0].trim(), parts[1].trim())
+                        .map(List::of)
+                        .map(Sort::by)
+                        .orElseGet(() -> Sort.by(Sort.Order.desc("time")));
+            }
+        }
+
+        /*
+         Otherwise, assume the array contains alternating field and direction.
+         For example, ["time", "desc", "name", "asc"] -> two orders.
+        */
+        for (int i = 0; i < sortParams.length; i += 2) {
+            String field = sortParams[i].trim();
+            String direction = (i + 1 < sortParams.length) ? sortParams[i + 1].trim().toLowerCase() : "asc";
+
+            Optional<Sort.Order> orderOpt = buildOrder(field, direction);
+            orderOpt.ifPresent(orders::add);
+        }
+
+        // If no valid orders, return default
+        if (orders.isEmpty()) {
+            return Sort.by(Sort.Order.desc("time"));
+        }
+        return Sort.by(orders);
+    }
+
+    private Optional<Sort.Order> buildOrder(String field, String direction) {
+        if (!isValidSortField(field)) {
+            log.warn("Invalid sort field '{}', ignoring", field);
+            return Optional.empty();
+        }
+        Sort.Direction sortDirection = direction.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        return Optional.of(new Sort.Order(sortDirection, field));
+    }
+    private boolean isValidSortField(String field) {
+        // Whitelist of allowed fields from the Event entity
+        // Include nested paths like "venue.name" if needed
+        Set<String> allowedFields = Set.of(
+                "name", "title", "time", "availableSeats", "totalSeats",
+                "venue.name", "venue.address" // if you need sorting by venue fields
+        );
+        return allowedFields.contains(field);
+    }
 }
