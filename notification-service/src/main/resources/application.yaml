@@ -32,6 +32,20 @@ spring:
           max-retries: 3
           multiplier: 2
         acknowledge-mode: auto
+  mail:
+    host : smtp.gmail.com
+    port : 587
+    username : jodos2006@gmail.com
+    password : uizm uwcm gcts rcub
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    protocol: smtp
+    test-connection: false
 # Swagger/OpenAPI Configuration
 springdoc:
   api-docs:

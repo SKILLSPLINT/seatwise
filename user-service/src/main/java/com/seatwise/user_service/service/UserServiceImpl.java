@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
                 .subject("Account Registration")
                 .body("Thank you for registering with SeatWise. We look aboard for you")
                 .recipient(user.getEmail())
-                .sender("seatwise@gmail.com")
+                .sender("info@seatwise.dpdns.org")
                 .build();
         emailProducer.sendEmailNotification(user.getId(), emailPayload);
 
@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
                 .subject(" Login to SeatWise")
                 .body("We detect new login  to your account on SeatWise")
                 .recipient(user.getEmail())
-                .sender("seatwise@gmail.com")
+                .sender("info@seatwise.dpdns.org")
                 .build();
         emailProducer.sendEmailNotification(user.getId(), emailPayload);
         return LoginResponse.builder()

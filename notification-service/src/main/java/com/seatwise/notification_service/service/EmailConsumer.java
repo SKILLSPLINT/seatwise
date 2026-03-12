@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -24,6 +26,7 @@ public class EmailConsumer {
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
     private final NotificationRepository notificationRepo;
+    private final JavaMailSender mailSender;
 
     @RabbitListener(queues = RabbitConstants.EMAIL_QUEUE)
     public void consumeEmail(Message message) throws JsonProcessingException {
@@ -53,6 +56,11 @@ public class EmailConsumer {
 
 
     private void sendEmail(EmailPayload payload) {
-        log.info(payload.toString());
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(payload.getRecipient());
+        message.setSubject(payload.getSubject());
+        message.setText(payload.getBody());
+        message.setFrom(payload.getSender());
+        mailSender.send(message);
     }
 }

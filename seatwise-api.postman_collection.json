@@ -1,0 +1,1020 @@
+{
+	"info": {
+		"_postman_id": "seatwise-api-collection",
+		"name": "SeatWise API Collection",
+		"description": "Complete API collection for SeatWise ticket booking system. Includes all endpoints for User Management, Event Management, Booking Management, Notification Management, and File Management services.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User Service",
+			"description": "User authentication and profile management endpoints",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+250788123456\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"gender\": \"MALE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "register"]
+						},
+						"description": "Create a new user account with email, password, and profile information"
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login"]
+						},
+						"description": "Authenticate user and return JWT token. Can use email or phone number"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Email",
+								"value": "user@example.com"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/user/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "user", "me"]
+						},
+						"description": "Get current authenticated user's profile information"
+					},
+					"response": []
+				},
+				{
+					"name": "Register Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\",\n  \"phoneNumber\": \"+250788654321\",\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\",\n  \"gender\": \"FEMALE\",\n  \"adminSecretKey\": \"your-admin-secret-key\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/admin/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "admin", "register"]
+						},
+						"description": "Create a new admin account. Requires valid admin secret key"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Profile Picture",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Email",
+								"value": "user@example.com"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "profile",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/user/profile-picture",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "user", "profile-picture"]
+						},
+						"description": "Upload or update profile picture for authenticated user"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event Service",
+			"description": "Event creation, management, and seat reservation endpoints",
+			"item": [
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "event",
+									"type": "text",
+									"value": "{\n  \"title\": \"Summer Music Festival\",\n  \"description\": \"An amazing outdoor music festival featuring top artists\",\n  \"location\": \"Kigali Convention Center\",\n  \"eventDate\": \"2024-07-15T18:00:00\",\n  \"totalSeats\": 500,\n  \"price\": 50.00\n}"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "Optional event image"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events"]
+						},
+						"description": "Create a new event with seats and optional image"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "event",
+									"type": "text",
+									"value": "{\n  \"title\": \"Updated Summer Music Festival\",\n  \"description\": \"An amazing outdoor music festival featuring top artists - Updated\",\n  \"location\": \"Kigali Convention Center - Main Hall\",\n  \"eventDate\": \"2024-07-15T19:00:00\",\n  \"totalSeats\": 600,\n  \"price\": 55.00\n}"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "Optional new event image"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}"]
+						},
+						"description": "Update an existing event. If totalSeats is changed, seats will be recreated"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Events",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events?page=0&size=20&sort=createdAt,desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"description": "Page size"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc",
+									"description": "Sort by field and direction"
+								}
+							]
+						},
+						"description": "Get paginated list of all events (seats not included)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Event by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}"]
+						},
+						"description": "Get detailed information about a specific event including all seats"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}"]
+						},
+						"description": "Delete an event and all its related seats and image"
+					},
+					"response": []
+				},
+				{
+					"name": "Reserve Seat",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/reserve/{{seat_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "reserve", "{{seat_id}}"]
+						},
+						"description": "Temporarily reserve a specific seat for the authenticated user. Reservation expires if not confirmed within time window"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Seat",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/confirm/{{seat_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "confirm", "{{seat_id}}"]
+						},
+						"description": "Finalize a previously reserved seat and mark it as booked"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking Service",
+			"description": "Booking creation, management, and confirmation endpoints",
+			"item": [
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"eventId\": \"{{event_id}}\",\n  \"seatId\": \"{{seat_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"]
+						},
+						"description": "Create a new booking for the authenticated user. Booking starts in RESERVED status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Bookings (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Role",
+								"value": "ADMIN"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings?page=0&size=20&sort=createdAt,desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"description": "Page size"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc",
+									"description": "Sort by field and direction"
+								}
+							]
+						},
+						"description": "Get paginated list of all bookings in the system (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/my-bookings?page=0&size=20&sort=createdAt,desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "my-bookings"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"description": "Page size"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc",
+									"description": "Sort by field and direction"
+								}
+							]
+						},
+						"description": "Get paginated list of bookings for the currently authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Booking by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{booking_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{booking_id}}"]
+						},
+						"description": "Get detailed information about a specific booking"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Booking",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/bookings/{{booking_id}}/confirm",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "bookings", "{{booking_id}}", "confirm"]
+						},
+						"description": "Confirm a previously reserved booking and mark it as BOOKED. Only the user who created the booking can confirm it"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notification Service",
+			"description": "Notification creation, retrieval, and management endpoints",
+			"item": [
+				{
+					"name": "Create Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"subject\": \"Booking Confirmation\",\n  \"body\": \"Your booking has been confirmed successfully!\",\n  \"type\": \"BOOKING_CONFIRMED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications"]
+						},
+						"description": "Create a new notification for a user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All User Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}?page=0&size=10&sortBy=createdAt&sortDir=desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "user", "{{user_id}}"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Page size"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"description": "Sort by field"
+								},
+								{
+									"key": "sortDir",
+									"value": "desc",
+									"description": "Sort direction (asc/desc)"
+								}
+							]
+						},
+						"description": "Get all notifications for a user with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notification by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/{{notification_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "{{notification_id}}"]
+						},
+						"description": "Get a specific notification by its ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Read Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/read?page=0&size=10&sortBy=createdAt&sortDir=desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "user", "{{user_id}}", "read"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Page size"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"description": "Sort by field"
+								},
+								{
+									"key": "sortDir",
+									"value": "desc",
+									"description": "Sort direction (asc/desc)"
+								}
+							]
+						},
+						"description": "Get all read notifications for a user with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/unread?page=0&size=10&sortBy=createdAt&sortDir=desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "user", "{{user_id}}", "unread"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Page size"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"description": "Sort by field"
+								},
+								{
+									"key": "sortDir",
+									"value": "desc",
+									"description": "Sort direction (asc/desc)"
+								}
+							]
+						},
+						"description": "Get all unread notifications for a user with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/{{notification_id}}/read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "{{notification_id}}", "read"]
+						},
+						"description": "Mark a specific notification as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "time-zone",
+								"value": "Africa/Kigali",
+								"description": "Optional user timezone"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/search?keyword=booking&type=BOOKING_CONFIRMED&isRead=false&page=0&size=10&sortBy=createdAt&sortDir=desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "user", "{{user_id}}", "search"],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "booking",
+									"description": "Search keyword (searches in subject and body)"
+								},
+								{
+									"key": "type",
+									"value": "BOOKING_CONFIRMED",
+									"description": "Notification type filter"
+								},
+								{
+									"key": "isRead",
+									"value": "false",
+									"description": "Read status filter (true/false)"
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Page size"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt",
+									"description": "Sort by field"
+								},
+								{
+									"key": "sortDir",
+									"value": "desc",
+									"description": "Sort direction (asc/desc)"
+								}
+							]
+						},
+						"description": "Search notifications by keyword, type, and read status"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/{{notification_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "{{notification_id}}"]
+						},
+						"description": "Delete a specific notification by its ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "File Service",
+			"description": "File upload, download, and management endpoints",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "category",
+									"type": "text",
+									"value": "profile"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/upload",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "files", "upload"]
+						},
+						"description": "Upload a file to the specified category (e.g., profile, documents, events)"
+					},
+					"response": []
+				},
+				{
+					"name": "Download File",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/{{category}}/{{filename}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "files", "{{category}}", "{{filename}}"]
+						},
+						"description": "Download a file by category and filename"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/{{category}}/{{filename}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "files", "{{category}}", "{{filename}}"]
+						},
+						"description": "Delete a file by category and filename"
+					},
+					"response": []
+				},
+				{
+					"name": "List Files in Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/list/{{category}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "files", "list", "{{category}}"]
+						},
+						"description": "Get a list of all files in the specified category"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Presigned URL",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/presigned/{{category}}/{{filename}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "files", "presigned", "{{category}}", "{{filename}}"]
+						},
+						"description": "Generate a temporary presigned URL for secure file download"
+					},
+					"response": []
+				},
+				{
+					"name": "Check File Exists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/exists/{{category}}/{{filename}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "files", "exists", "{{category}}", "{{filename}}"]
+						},
+						"description": "Check if a file exists in the specified category"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"description": "Base URL for the API Gateway"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"description": "JWT authentication token obtained from login"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"description": "Current authenticated user ID"
+		},
+		{
+			"key": "event_id",
+			"value": "",
+			"description": "Event ID for testing event-related endpoints"
+		},
+		{
+			"key": "seat_id",
+			"value": "",
+			"description": "Seat ID for testing seat-related endpoints"
+		},
+		{
+			"key": "booking_id",
+			"value": "",
+			"description": "Booking ID for testing booking-related endpoints"
+		},
+		{
+			"key": "notification_id",
+			"value": "",
+			"description": "Notification ID for testing notification-related endpoints"
+		},
+		{
+			"key": "category",
+			"value": "profile",
+			"description": "File category for file operations"
+		},
+		{
+			"key": "filename",
+			"value": "",
+			"description": "Filename for file operations"
+		}
+	]
+}
