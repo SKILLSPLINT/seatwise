@@ -2,8 +2,10 @@ package com.seatwise.booking_service.service;
 
 import com.seatwise.booking_service.dto.request.CreateBookingRequest;
 import com.seatwise.booking_service.dto.response.BookingResponseDto;
+import com.seatwise.booking_service.dto.response.SeatResponse;
 import com.seatwise.booking_service.model.Booking;
 import com.seatwise.booking_service.repository.BookingRepository;
+import dto.EmailPayload;
 import enums.EBookingStatus;
 import exception.BadRequestException;
 import exception.ConflictException;
@@ -26,16 +28,18 @@ import java.util.UUID;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+    private final EventService eventService;
+    private final EmailProducer emailProducer;
 
     @Override
     @Transactional
-    public BookingResponseDto createBooking(CreateBookingRequest request, UUID userId, String userTimeZone) {
+    public BookingResponseDto createBooking(CreateBookingRequest request, UUID userId, String userEmail, String userTimeZone) {
         log.info("Creating booking for user: {} for event: {} seat: {}", userId, request.getEventId(), request.getSeatId());
 
         // Check if booking already exists for this event and seat
         bookingRepository.findByEventIdAndSeatId(request.getEventId(), request.getSeatId())
                 .ifPresent(existing -> {
-                    throw new ConflictException("Booking already exists for this seat");
+                    throw new ConflictException("Booking already exists for this seat , move to payment");
                 });
 
         Booking booking = Booking.builder()
@@ -46,9 +50,24 @@ public class BookingServiceImpl implements BookingService {
                 .reservedAt(Instant.now())
                 .build();
 
+        SeatResponse seatResponse = eventService.reserveSeat(request.getSeatId(), request.getEventId(), userId, userEmail);
         Booking savedBooking = bookingRepository.save(booking);
         log.info("Booking created successfully with ID: {}", savedBooking.getId());
 
+        EmailPayload emailPayload = EmailPayload.builder()
+                .subject("Seat Reserved")
+                .body("Hello,\n\n" +
+                        "Your seat has been successfully reserved.\n\n" +
+                        "Booking ID: " + savedBooking.getId() + "\n" +
+                        "Event ID: " + savedBooking.getEventId() + "\n" +
+                        "Seat ID: " + savedBooking.getSeatId() + "\n\n" +
+                        "Please complete your payment before the reservation expires.\n\n" +
+                        "Thank you for using Seatwise.\n" +
+                        "Seatwise Team")
+                .sender("info@seatwise.dpdns.org")
+                .recipient(seatResponse.getUserEmail())
+                .build();
+        emailProducer.sendEmailNotification(seatResponse.getUserId(), emailPayload);
         return mapToDto(savedBooking, userTimeZone);
     }
 
@@ -69,14 +88,14 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
 //    this must be called by payment service
-    public BookingResponseDto confirmBooking(UUID bookingId, UUID userId, String userTimeZone) {
-        log.info("Confirming booking: {} for user: {}", bookingId, userId);
+    public BookingResponseDto confirmBooking(UUID bookingId, UUID userID, String userEmail, String userTimeZone) {
+        log.info("Confirming booking: {} for user: {}", bookingId, userID);
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", bookingId));
 
         // Ensure the user owns this booking
-        if (!booking.getUserId().equals(userId)) {
+        if (!booking.getUserId().equals(userID)) {
             throw new UnauthorizedException("You are not authorized to confirm this booking");
         }
 
@@ -87,10 +106,26 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(EBookingStatus.BOOKED);
         booking.setPaidAt(Instant.now());
+        SeatResponse seatResponse = eventService.confirmSeat(booking.getSeatId(), userID, userEmail);
 
         Booking confirmedBooking = bookingRepository.save(booking);
         log.info("Booking confirmed successfully: {}", bookingId);
-
+        //TODO: notification will be sent in payment service
+        EmailPayload emailPayload = EmailPayload.builder()
+                .subject("Seat Confirmed and Payment Completed")
+                .body("Hello " + seatResponse.getUserEmail() + ",\n\n" +
+                        "Your booking has been successfully confirmed and payment has been completed.\n\n" +
+                        "Booking Details:\n" +
+                        "Booking ID: " + confirmedBooking.getId() + "\n" +
+                        "Event ID: " + confirmedBooking.getEventId() + "\n" +
+                        "Seat ID: " + confirmedBooking.getSeatId() + "\n\n" +
+                        "Thank you for using SeatWise! We look forward to seeing you at the event.\n\n" +
+                        "Best regards,\n" +
+                        "SeatWise Team")
+                .sender("info@seatwise.dpdns.org")
+                .recipient(seatResponse.getUserEmail())
+                .build();
+        emailProducer.sendEmailNotification(seatResponse.getUserId(), emailPayload);
         return mapToDto(confirmedBooking, userTimeZone);
     }
 

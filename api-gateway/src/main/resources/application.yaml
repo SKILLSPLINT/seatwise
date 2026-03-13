@@ -62,6 +62,9 @@ spring:
               args:
                 retries: 3
                 statuses: SERVICE_UNAVAILABLE,NOT_FOUND
+    loadbalancer:
+      cache:
+        ttl: 10s
 
 # Springdoc OpenAPI Configuration - Aggregated Swagger UI
 springdoc:
@@ -97,8 +100,8 @@ eureka:
     metadata-map:
       version: 1.0.0
       environment: dev
-    lease-renewal-interval-in-seconds: 15 #ping 15 secs
-    lease-expiration-duration-in-seconds: 45 # no response in this timme service put down
+    lease-renewal-interval-in-seconds: 5 #ping 15 secs
+    lease-expiration-duration-in-seconds: 10 # no response in this timme service put down
 
 management:
   endpoints:

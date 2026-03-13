@@ -1,18 +1,11 @@
-package com.seatwise.event_service.dto.response;
+package com.seatwise.booking_service.dto.response;
 
 import enums.ESeat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.UUID;
-
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class SeatResponseDto {
+public class SeatResponse {
     private UUID id;
     private String seatNumber;
     private ESeat status;
@@ -22,4 +15,3 @@ public class SeatResponseDto {
     private String createdAt; // formatted time in user timezone
     private String updatedAt; // formatted time in user timezone
 }
-

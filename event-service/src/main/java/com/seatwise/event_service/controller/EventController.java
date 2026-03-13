@@ -104,7 +104,7 @@ public class EventController {
             HttpServletRequest request
     ) {
         String userTimeZone = request.getHeader("time-zone");
-        EventResponseDto eventResponse = eventService.updateEvent(eventId, dto, userTimeZone,image);
+        EventResponseDto eventResponse = eventService.updateEvent(eventId, dto, userTimeZone, image);
         return ResponseEntity.ok(
                 BaseResponse.success("Event updated successfully", eventResponse)
         );
@@ -182,14 +182,10 @@ public class EventController {
                     description = "User time zone (e.g., Africa/Kigali, Europe/London)",
                     example = "Africa/Kigali"
             )
-            @RequestHeader(value = "time-zone", required = false) String userTimeZone,
+            @RequestHeader(value = "time-zone", required = false) String userTimeZone
+            ,
+            @RequestHeader("X-User-Email") String userEmail,
 
-            @Parameter(
-                    description = "Event ID",
-                    required = true,
-                    example = "9a1b2c3d-1111-4aaa-bbbb-ccccdddd0000"
-            )
-            @PathVariable UUID eventId,
 
             @Parameter(
                     description = "Seat ID to reserve",
@@ -198,13 +194,13 @@ public class EventController {
             )
             @PathVariable UUID seatId
     ) {
-        SeatResponseDto seat = eventService.reserveSeat(seatId, userId, userTimeZone);
+        SeatResponseDto seat = eventService.reserveSeat(seatId, userId, userTimeZone,userEmail);
         return ResponseEntity.ok(
                 BaseResponse.success("Seat reserved successfully", seat)
         );
     }
 
-    @PatchMapping("/{eventId}/confirm/{seatId}")
+    @PatchMapping("/confirm/{seatId}")
     @Operation(
             summary = "Confirm seat booking",
             description = "Finalizes a previously reserved seat and marks it as booked. " +
@@ -223,6 +219,8 @@ public class EventController {
                     example = "c1a2f3d4-5678-4abc-9def-1234567890ab"
             )
             @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Email") String userEmail,
+
 
             @Parameter(
                     description = "User time zone (e.g., Africa/Kigali, Europe/London)",
@@ -230,12 +228,6 @@ public class EventController {
             )
             @RequestHeader(value = "time-zone", required = false) String userTimeZone,
 
-            @Parameter(
-                    description = "Event ID",
-                    required = true,
-                    example = "9a1b2c3d-1111-4aaa-bbbb-ccccdddd0000"
-            )
-            @PathVariable UUID eventId,
 
             @Parameter(
                     description = "Seat ID to confirm",
@@ -244,7 +236,7 @@ public class EventController {
             )
             @PathVariable UUID seatId
     ) {
-        SeatResponseDto seat = eventService.confirmSeat(seatId, userId, userTimeZone);
+        SeatResponseDto seat = eventService.confirmSeat(seatId, userId, userTimeZone,userEmail);
         return ResponseEntity.ok(
                 BaseResponse.success("Seat confirmed successfully", seat)
         );
@@ -277,9 +269,9 @@ public class EventController {
     ) {
         log.info("Received sort parameter: {}", Arrays.toString(sort));
         Pageable pageable = PageRequest.of(page, size, (parseSort(sort)));
-        Page<EventResponseDto> events = eventService.search(query,venueName,fromTime,toTime,minAvailableSeats,pageable,userTimeZone);
+        Page<EventResponseDto> events = eventService.search(query, venueName, fromTime, toTime, minAvailableSeats, pageable, userTimeZone);
         return ResponseEntity.ok(
-                BaseResponse.success("Seat confirmed successfully",events)
+                BaseResponse.success("Seat confirmed successfully", events)
         );
     }
 
@@ -329,6 +321,7 @@ public class EventController {
         Sort.Direction sortDirection = direction.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         return Optional.of(new Sort.Order(sortDirection, field));
     }
+
     private boolean isValidSortField(String field) {
         // Whitelist of allowed fields from the Event entity
         // Include nested paths like "venue.name" if needed

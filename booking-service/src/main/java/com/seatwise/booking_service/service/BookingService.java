@@ -9,13 +9,13 @@ import java.util.UUID;
 
 public interface BookingService {
 
-    BookingResponseDto createBooking(CreateBookingRequest request, UUID userId, String userTimeZone);
+    BookingResponseDto createBooking(CreateBookingRequest request, UUID userId,String userEmail, String userTimeZone);
 
     Page<BookingResponseDto> getAllBookings(Pageable pageable, String userTimeZone);
 
     Page<BookingResponseDto> getBookingsByUserId(UUID userId, Pageable pageable, String userTimeZone);
 
-    BookingResponseDto confirmBooking(UUID bookingId, UUID userId, String userTimeZone);
+    BookingResponseDto confirmBooking(UUID bookingId, UUID userId,String userEmail, String userTimeZone);
 
     BookingResponseDto getBookingById(UUID bookingId, String userTimeZone);
 }

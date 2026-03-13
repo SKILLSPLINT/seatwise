@@ -44,6 +44,8 @@ public class BookingController {
     public ResponseEntity<BaseResponse<BookingResponseDto>> createBooking(
             @Parameter(hidden = true)
             @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-email") String userEmail,
+
 
             @Parameter(
                     description = "User time zone (e.g., Africa/Kigali, Europe/London)",
@@ -53,7 +55,7 @@ public class BookingController {
 
             @Valid @RequestBody CreateBookingRequest request
     ) {
-        BookingResponseDto booking = bookingService.createBooking(request, userId, userTimeZone);
+        BookingResponseDto booking = bookingService.createBooking(request, userId, userEmail,userTimeZone);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 BaseResponse.success("Booking created successfully", booking)
         );
@@ -157,6 +159,8 @@ public class BookingController {
     })
     public ResponseEntity<BaseResponse<BookingResponseDto>> confirmBooking(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") UUID userId,
+            @Parameter(hidden = true)  @RequestHeader("X-User-email") String userEmail,
+
 
             @Parameter(
                     description = "User time zone (e.g., Africa/Kigali, Europe/London)",
@@ -167,7 +171,7 @@ public class BookingController {
             @Parameter(description = "Booking ID to confirm", required = true)
             @PathVariable UUID bookingId
     ) {
-        BookingResponseDto booking = bookingService.confirmBooking(bookingId, userId, userTimeZone);
+        BookingResponseDto booking = bookingService.confirmBooking(bookingId, userId, userEmail,userTimeZone);
         return ResponseEntity.ok(
                 BaseResponse.success("Booking confirmed successfully", booking)
         );

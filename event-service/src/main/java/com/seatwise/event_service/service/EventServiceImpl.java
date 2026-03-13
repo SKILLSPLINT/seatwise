@@ -11,6 +11,7 @@ import com.seatwise.event_service.model.File;
 import com.seatwise.event_service.model.Seat;
 import com.seatwise.event_service.repository.EventRepository;
 import com.seatwise.event_service.repository.SeatRepository;
+import dto.EmailPayload;
 import enums.EFileCategory;
 import enums.ESeat;
 import exception.BadRequestException;
@@ -167,7 +168,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public SeatResponseDto reserveSeat(UUID seatId, UUID userId, String userTimeZone) {
+    public SeatResponseDto reserveSeat(UUID seatId, UUID userId, String userTimeZone,String userEmail) {
         Seat seat = seatRepo.findById(seatId).orElseThrow(() -> new ResourceNotFoundException("Seat", "id", seatId.toString()));
         if (seat.getStatus() != ESeat.AVAILABLE) {
             throw new ConflictException("seat is already reserved , please  try another seat");
@@ -178,20 +179,23 @@ public class EventServiceImpl implements EventService {
         Event event = seat.getEvent();
         event.setAvailableSeats(event.getAvailableSeats() - 1);
         eventRepo.save(event);
-        return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone);
+        return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone,userEmail);
     }
 
     @Override
-    public SeatResponseDto confirmSeat(UUID seatId, UUID userId, String userTimeZone) {
+    public SeatResponseDto confirmSeat(UUID seatId, UUID userId, String userTimeZone,String userEmail) {
         Seat seat = seatRepo.findById(seatId).orElseThrow(() -> new ResourceNotFoundException("Seat", "id", seatId.toString()));
         if (seat.getStatus() != ESeat.RESERVED) {
             throw new BadRequestException("seat is not reserved");
         }
-        if (seat.getUserId() != userId) {
+        log.info("confirming seat with id {}", seatId);
+        log.info("confirming  user  id {}", userId);
+        log.info("confirming  user   id from db {}", seat.getUserId());
+        if (!seat.getUserId().equals(userId)) {
             throw new BadRequestException("seat is not reserved by this user");
         }
         seat.setStatus(ESeat.BOOKED);
-        return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone);
+        return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone,userEmail);
     }
 
     @Override
@@ -210,6 +214,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Scheduled(fixedRateString = "${seat.release.interval}")
     public void releaseSeat() {
+        //TODO: after releasing seat  delete  its booking  record so it become available
         Instant now = Instant.now();
         List<Seat> reservedSeats = seatRepo.findByStatus(ESeat.RESERVED);
 
@@ -391,13 +396,14 @@ public class EventServiceImpl implements EventService {
     /**
      * Maps Seat entity to SeatResponseDto
      */
-    private SeatResponseDto mapToSeatResponseDto(Seat seat, String userTimeZone) {
+    private SeatResponseDto mapToSeatResponseDto(Seat seat, String userTimeZone,String userEmail) {
         return SeatResponseDto.builder()
                 .id(seat.getId())
                 .seatNumber(seat.getSeatNumber())
                 .status(seat.getStatus())
                 .reservedAt(TimeUtils.toUserOrUtc(seat.getReservedAt(), userTimeZone))
                 .userId(seat.getUserId())
+                .userEmail(userEmail)
                 .createdAt(TimeUtils.toUserOrUtc(seat.getCreatedAt(), userTimeZone))
                 .updatedAt(TimeUtils.toUserOrUtc(seat.getUpdatedAt(), userTimeZone))
                 .build();

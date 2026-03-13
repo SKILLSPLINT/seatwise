@@ -53,10 +53,7 @@ This roadmap is prioritized to reach a Minimum Viable Product (MVP) for the East
     -   *Checkpoint*: Users receive emails for every booking step.
 
 #### Phase 2: Refinement & Scalability (Medium Priority)
-1.  **Task: Advanced Search API**
-    -   *Detail*: Implement Specification-based filtering in `EventRepository` to allow searching by title, venue, and date ranges.
-    -   *Checkpoint*: Frontend can filter events dynamically.
-2.  **Task: Unit & Integration Testing**
+1.**Task: Unit & Integration Testing**
     -   *Detail*: Add Mockito tests for `BookingService` and `EventService` logic, focusing on race conditions during seat reservation.
     -   *Checkpoint*: Test coverage reaches >70% for business logic.
 

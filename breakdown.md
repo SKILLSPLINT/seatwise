@@ -7,15 +7,15 @@ This document serves as the master guide for the **SeatWise** platform, providin
 ### 1. Task Tracker (Assignable Tasks)
 *Format compatible with Jira, Trello, and GitHub Projects.*
 
-| Task ID | Task Name | Priority | Service | Status | Checkpoints (Definition of Done) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **STW-001** | **Seat Auto-Release Scheduler** | **High** | `event-service` | To Do | `@Scheduled` task runs every 5m; Releases `RESERVED` seats after 15m. |
+| Task ID | Task Name | Priority | Service | Status | Checkpoints (Definition of Done)                                                       |
+| :--- | :--- | :--- | :--- | :--- |:---------------------------------------------------------------------------------------|
+| **STW-001** | **Seat Auto-Release Scheduler** | **High** | `event-service` | To Do | `@Scheduled` ~~task runs every 5m; Releases `RESERVED` seats after 15m.~~                  |
 | **STW-002** | **Payment Service MVP** | **High** | `payment-service` | To Do | CRUD for Transactions; Webhook for payment status; Integration with `booking-service`. |
-| **STW-003** | **Notification Triggers** | **High** | `notification-service` | In Progress | RabbitMQ producers added to Booking & Event services for all status changes. |
-| **STW-004** | **Event Search & Filtering** | **Medium** | `event-service` | To Do | Query DSL or JPA Specifications for searching by title, date, and venue. |
-| **STW-005** | **SMS Notification Provider** | **Medium** | `notification-service` | To Do | SMS service implementation (e.g., Africa's Talking) added to `NotificationConsumer`. |
-| **STW-006** | **Unit/Integration Tests** | **Medium** | All | To Do | >70% coverage for business logic in `booking-service` and `event-service`. |
-| **STW-007** | **QR Code Generation** | **Low** | `booking-service` | To Do | PDF/Image ticket with QR code generated upon successful payment. |
+| **STW-003** | **Notification Triggers** | **High** | `notification-service` | In Progress | RabbitMQ producers added to Booking & Event services for all status changes.           |
+| **STW-004** | **Event Search & Filtering** | **Medium** | `event-service` | To Do | ~~Query DSL or JPA Specifications for searching by title, date, and venue~~                |
+| **STW-005** | **SMS Notification Provider** | **Medium** | `notification-service` | To Do | SMS service implementation (e.g., Africa's Talking) added to `NotificationConsumer`.   |
+| **STW-006** | **Unit/Integration Tests** | **Medium** | All | To Do | >70% coverage for business logic in `booking-service` and `event-service`.             |
+| **STW-007** | **QR Code Generation** | **Low** | `booking-service` | To Do | PDF/Image ticket with QR code generated upon successful payment.                       |
 
 ---
 

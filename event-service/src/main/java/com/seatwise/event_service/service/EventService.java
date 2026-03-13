@@ -23,9 +23,9 @@ public interface EventService {
 
     void deleteEvent(UUID eventId);
 
-    SeatResponseDto reserveSeat(UUID seatId, UUID userId, String userTimeZone);
+    SeatResponseDto reserveSeat(UUID seatId, UUID userId, String userTimeZone,String userEmail);
 
-    SeatResponseDto confirmSeat(UUID seatId,UUID userId, String userTimeZone);
+    SeatResponseDto confirmSeat(UUID seatId,UUID userId, String userTimeZone,String userEmail);
 
     Page<EventResponseDto> search(String query, String venueName, Instant fromTime, Instant toTime, Integer minAvailableSeats, Pageable pageable, String userTimeZone);
 }
