@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -26,5 +27,21 @@ public class Payment extends  BaseEntity{
     private String description;
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status",nullable = false)
-    private EPaymentStatus paymentStatus;
+    private EPaymentStatus status;
+
+    @Column(nullable = false, unique = true)
+    private String transactionRef;
+
+    @Column(nullable = false, unique = true)
+    private String orderReference;
+
+    @Column(nullable = false)
+    private String phoneNumber;
+
+    private String network;             // MTN or AIRTEL
+    private String failureReason;
+
+    private Instant completedAt;
+
+
 }

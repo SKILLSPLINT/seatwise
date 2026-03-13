@@ -68,3 +68,9 @@ management:
   endpoint:
     health:
       show-details: always
+paypack:
+  client-id: 4994a332-1ef9-11f1-9734-deadd43720af
+  client-secret: bb2dbdd0a3acc2f9e1f5f06ce6414597da39a3ee5e6b4b0d3255bfef95601890afd80709
+  base-url: https://payments.paypack.rw/api
+  webhook-secret: 5iUpQXb6yNCW1BHyfpgnQB35t7R0IrjalTdpbWryrdvND31HVJ
+  webhook-mode: development
