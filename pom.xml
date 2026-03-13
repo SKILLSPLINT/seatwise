@@ -28,6 +28,7 @@
         <module>notification-service</module>
         <module>user-service</module>
         <module>file-service</module>
+        <module>payment-service</module>
     </modules>
 
     <properties>

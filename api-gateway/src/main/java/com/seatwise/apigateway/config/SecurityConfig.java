@@ -28,6 +28,7 @@ public class SecurityConfig {
                                         "/event-service/api-docs/**",
                                         "/file-service/api-docs/**",
                                         "/booking-service/api-docs/**",
+                                        "/payment-service/api-docs/**",
                                         "/notification-service/api-docs/**").
                                 permitAll()
                                 .pathMatchers(HttpMethod.POST, "/api/v1/events").hasRole("ADMIN")

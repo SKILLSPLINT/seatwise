@@ -26,6 +26,14 @@ spring:
               uri: lb://BOOKING-SERVICE
               predicates:
                 - Path=/api/v1/bookings/**
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/v1/payments/**
+            - id: notification-service
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/api/v1/notifications/**
             # Swagger/OpenAPI Routes for each service
             - id: user-service-api-docs
               uri: lb://USER-SERVICE
@@ -57,6 +65,12 @@ spring:
                 - Path=/notification-service/api-docs/**
               filters:
                 - RewritePath=/notification-service/api-docs(?<segment>.*), /api-docs${segment}
+            - id: payment-service-api-docs
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/payment-service/api-docs/**
+              filters:
+                - RewritePath=/payment-service/api-docs(?<segment>.*), /api-docs${segment}
           default-filters:
             - name: Retry
               args:
@@ -80,6 +94,8 @@ springdoc:
         url: /booking-service/api-docs
       - name: Notification Service
         url: /notification-service/api-docs
+      - name: Payment Service
+        url: /payment-service/api-docs
 
 logging:
   level:
