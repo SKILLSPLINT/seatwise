@@ -51,3 +51,5 @@ services:
     url: http://EVENT-SERVICE
   notification-service:
     url: http://NOTIFICATION-SERVICE
+  payment-service:
+    url: http://PAYMENT-SERVICE

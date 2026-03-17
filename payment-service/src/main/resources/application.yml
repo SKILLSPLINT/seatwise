@@ -74,3 +74,6 @@ paypack:
   base-url: https://payments.paypack.rw/api
   webhook-secret: 5iUpQXb6yNCW1BHyfpgnQB35t7R0IrjalTdpbWryrdvND31HVJ
   webhook-mode: development
+#https://pellucid-ungoaded-rupert: 
+#  ngrok-free:
+#    dev/api/v1/webhooks/paypack:

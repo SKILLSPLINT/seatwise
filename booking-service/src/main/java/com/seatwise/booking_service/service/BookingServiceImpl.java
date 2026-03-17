@@ -30,6 +30,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final EventService eventService;
     private final EmailProducer emailProducer;
+    private final PaymentService paymentService;
 
     @Override
     @Transactional
@@ -68,6 +69,8 @@ public class BookingServiceImpl implements BookingService {
                 .recipient(seatResponse.getUserEmail())
                 .build();
         emailProducer.sendEmailNotification(seatResponse.getUserId(), emailPayload);
+        paymentService.initiatePayment(request.getPhoneNumber(),savedBooking.getId(),request.getAmount(),userId,request.getOrderReference(),request.getDescription());
+
         return mapToDto(savedBooking, userTimeZone);
     }
 
@@ -109,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
         SeatResponse seatResponse = eventService.confirmSeat(booking.getSeatId(), userID, userEmail);
 
         Booking confirmedBooking = bookingRepository.save(booking);
-        log.info("Booking confirmed successfully: {}", bookingId);
+        log.info("Booking confirmed successfully: {}",bookingId);
         //TODO: notification will be sent in payment service
         EmailPayload emailPayload = EmailPayload.builder()
                 .subject("Seat Confirmed and Payment Completed")

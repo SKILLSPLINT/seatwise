@@ -1,6 +1,7 @@
-package com.seatwise.paymentservice.dtos.request;// dto/request/PaymentRequest.java  — what your client (frontend/app) sends YOU
+package com.seatwise.booking_service.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
 
 @Data
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class PaymentRequest {
 
     @NotBlank(message = "Phone number is required")

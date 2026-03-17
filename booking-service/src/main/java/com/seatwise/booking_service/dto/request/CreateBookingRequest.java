@@ -23,4 +23,8 @@ public class CreateBookingRequest {
     @NotNull(message = "Seat ID is required")
     @Schema(description = "ID of the seat to book", example = "7f8e9d10-2222-4bbb-aaaa-eeeeffff9999", required = true)
     private UUID seatId;
+    private String phoneNumber;
+    private Double amount;
+    private String orderReference;
+    private String description;
 }

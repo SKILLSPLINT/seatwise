@@ -54,9 +54,9 @@ public class PaymentServiceImpl implements IPaymentService {
                     .amount(request.getAmount())
                     .status(EPaymentStatus.PENDING)
                     .network(network)
-                    .userId(UUID.randomUUID())
-                    .bookingId(UUID.randomUUID())
-                    .description("payment for seat")
+                    .userId(request.getUserID())
+                    .bookingId(request.getBookingID())
+                    .description(request.getDescription())
                     .build();
 
             paymentRepo.save(transaction);
@@ -100,6 +100,7 @@ public class PaymentServiceImpl implements IPaymentService {
                 .amount(tx.getAmount())
                 .build();
     }
+
     @Override
     public PaymentResponse checkStatusFromPaypack(String transactionRef) {
         log.info("Fetching live status from Paypack for ref: {}", transactionRef);
@@ -138,6 +139,7 @@ public class PaymentServiceImpl implements IPaymentService {
             throw new RuntimeException("Could not fetch status: " + e.getMessage());
         }
     }
+
     // ✅ Returns PaypackTransactionResponse — NOT PaymentResponse
     private PaypackTransactionResponse callPaypackCashin(PaymentRequest request) {
         String token = tokenService.getValidAccessToken();
@@ -165,7 +167,7 @@ public class PaymentServiceImpl implements IPaymentService {
         return switch (tx.getStatus()) {
             case PENDING -> "⏳ Waiting for " + tx.getPhoneNumber() + " to approve on phone.";
             case SUCCESS -> "✅ Payment of " + tx.getAmount() + " RWF received from " + tx.getPhoneNumber();
-            case FAILED  -> "❌ Payment failed: " +
+            case FAILED -> "❌ Payment failed: " +
                     (tx.getFailureReason() != null ? tx.getFailureReason() : "User declined or timeout");
         };
     }

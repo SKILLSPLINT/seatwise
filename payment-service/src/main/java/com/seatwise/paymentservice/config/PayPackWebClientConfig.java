@@ -1,6 +1,5 @@
 package com.seatwise.paymentservice.config;
 
-import com.seatwise.paymentservice.config.PaypackProperties;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -16,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @RequiredArgsConstructor
-public class WebClientConfig {
+public class PayPackWebClientConfig {
 
     private final PaypackProperties paypackProperties;
 
