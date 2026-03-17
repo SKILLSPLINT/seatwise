@@ -15,9 +15,9 @@ import java.util.UUID;
 public class PaymentService {
     private final PaymentClient client;
 
-    PaymentResponse initiatePayment(String phoneNumber, UUID bookingId, Double amount, UUID userId, String orderReference, String description) {
+    PaymentResponse initiatePayment(String phoneNumber, UUID bookingId, Double amount, UUID userId, String userEmail, String orderReference, String description) {
         try {
-            return client.initiatePayment(phoneNumber, bookingId, amount, userId, orderReference, description);
+            return client.initiatePayment(phoneNumber, bookingId, amount, userId, userEmail, orderReference, description);
         } catch (Exception e) {
             log.error("Error initiating payment", e);
             throw new BadRequestException("To initiate payment failed , please try again");

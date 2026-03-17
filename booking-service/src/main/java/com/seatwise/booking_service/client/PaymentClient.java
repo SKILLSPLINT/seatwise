@@ -24,7 +24,7 @@ public class PaymentClient {
         this.webClient = webClient.baseUrl(baseUrl).build();
     }
 
-    public PaymentResponse initiatePayment(String phoneNumber, UUID bookingId, Double amount, UUID userId, String orderReference, String description) {
+    public PaymentResponse initiatePayment(String phoneNumber, UUID bookingId, Double amount, UUID userId, String userEmail, String orderReference, String description) {
         try {
             BaseResponse<PaymentResponse> response = webClient.post()
                     .uri("/api/v1/payments/momo")
@@ -33,6 +33,7 @@ public class PaymentClient {
                             amount,
                             bookingId,
                             userId,
+                            userEmail,
                             orderReference,
                             description
                     ))

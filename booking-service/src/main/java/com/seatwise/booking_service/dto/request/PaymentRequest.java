@@ -25,6 +25,7 @@ public class PaymentRequest {
 
     private UUID bookingID;
     private UUID userID;
+    private String userEmail;
 
     @NotBlank(message = "Order reference is required")
     private String orderReference;

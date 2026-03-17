@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +54,7 @@ public class PaymentServiceImpl implements IPaymentService {
                     .status(EPaymentStatus.PENDING)
                     .network(network)
                     .userId(request.getUserID())
+                    .userEmail(request.getUserEmail())
                     .bookingId(request.getBookingID())
                     .description(request.getDescription())
                     .build();
@@ -119,7 +119,7 @@ public class PaymentServiceImpl implements IPaymentService {
                 throw new RuntimeException("No response from Paypack for ref: " + transactionRef);
             }
 
-            // DB is source of truth — webhook keeps it updated in real-time
+            // DB is a source of truth — webhook keeps it updated in real-time
             Payment tx = paymentRepo.findByTransactionRef(transactionRef)
                     .orElseThrow(() -> new RuntimeException(
                             "Transaction not found: " + transactionRef));
@@ -140,7 +140,6 @@ public class PaymentServiceImpl implements IPaymentService {
         }
     }
 
-    // ✅ Returns PaypackTransactionResponse — NOT PaymentResponse
     private PaypackTransactionResponse callPaypackCashin(PaymentRequest request) {
         String token = tokenService.getValidAccessToken();
 

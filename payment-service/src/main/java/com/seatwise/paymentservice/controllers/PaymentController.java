@@ -3,6 +3,7 @@ package com.seatwise.paymentservice.controllers;
 import com.seatwise.paymentservice.dtos.request.PaymentRequest;
 import com.seatwise.paymentservice.dtos.response.PaymentResponse;
 import com.seatwise.paymentservice.services.IPaymentService;
+import dto.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +26,14 @@ public class PaymentController {
      *         "orderReference": "ORDER-001", "description": "..." }
      */
     @PostMapping("/momo")
-    public ResponseEntity<PaymentResponse> initiateMomoPayment(
+    public ResponseEntity<BaseResponse<PaymentResponse>> initiateMomoPayment(
             @Valid @RequestBody PaymentRequest request) {
 
         log.info("📲 MoMo payment request — phone: {}, amount: {}",
                 request.getPhoneNumber(), request.getAmount());
 
         PaymentResponse response = paymentService.initiatePayment(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(BaseResponse.success("payment initiated",response));
     }
 
     /**

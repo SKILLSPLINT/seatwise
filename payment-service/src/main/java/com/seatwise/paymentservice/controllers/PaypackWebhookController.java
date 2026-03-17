@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seatwise.paymentservice.config.PaypackProperties;
 import com.seatwise.paymentservice.enums.EPaymentStatus;
+import com.seatwise.paymentservice.models.Payment;
+import com.seatwise.paymentservice.publisher.PaymentProducer;
 import com.seatwise.paymentservice.repository.IPaymentRepository;
+import dto.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,7 @@ public class PaypackWebhookController {
     private final IPaymentRepository transactionRepository;
     private final PaypackProperties paypackProperties;
     private final ObjectMapper objectMapper;
+    private final PaymentProducer paymentProducer;
 
     /**
      * Paypack POSTs here when a transaction is processed (success or failure).
@@ -121,11 +125,10 @@ public class PaypackWebhookController {
                     if (newStatus == EPaymentStatus.SUCCESS) {
                         transaction.setCompletedAt(Instant.now());
                         log.info("✅ Payment SUCCESSFUL — ref: {}, amount: {} RWF", ref, fee);
-                        // 🔔 ADD YOUR BUSINESS LOGIC HERE:
-                        // - Send SMS confirmation
-                        // - Fulfill the order
-                        // - Publish event to order service
-                        // - Notify via WebSocket
+                        
+                        // Publish event to booking service
+                        publishPaymentSuccessEvent(transaction);
+                        
                     } else {
                         transaction.setFailureReason("Payment declined or timed out");
                         log.warn("❌ Payment FAILED — ref: {}", ref);
@@ -135,6 +138,17 @@ public class PaypackWebhookController {
                 },
                 () -> log.warn("⚠️ Webhook for unknown transaction ref: {}", ref)
         );
+    }
+
+    private void publishPaymentSuccessEvent(Payment transaction) {
+        PaymentSuccessEvent event = PaymentSuccessEvent.builder()
+                .bookingId(transaction.getBookingId())
+                .userId(transaction.getUserId())
+                .userEmail(transaction.getUserEmail())
+                .transactionRef(transaction.getTransactionRef())
+                .amount(transaction.getAmount())
+                .build();
+        paymentProducer.publishPaymentSuccess(event);
     }
 
     /**

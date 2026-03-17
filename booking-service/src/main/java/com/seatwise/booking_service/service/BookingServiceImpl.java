@@ -69,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
                 .recipient(seatResponse.getUserEmail())
                 .build();
         emailProducer.sendEmailNotification(seatResponse.getUserId(), emailPayload);
-        paymentService.initiatePayment(request.getPhoneNumber(),savedBooking.getId(),request.getAmount(),userId,request.getOrderReference(),request.getDescription());
+        paymentService.initiatePayment(request.getPhoneNumber(),savedBooking.getId(),request.getAmount(),userId, userEmail, request.getOrderReference(),request.getDescription());
 
         return mapToDto(savedBooking, userTimeZone);
     }
@@ -103,6 +103,11 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // Check if booking is in RESERVED status
+        if (booking.getStatus() == EBookingStatus.BOOKED) {
+            log.info("Booking {} already confirmed, skipping.", bookingId);
+            return mapToDto(booking, userTimeZone);
+        }
+
         if (booking.getStatus() != EBookingStatus.RESERVED) {
             throw new BadRequestException("Booking cannot be confirmed. Current status: " + booking.getStatus());
         }
@@ -113,7 +118,6 @@ public class BookingServiceImpl implements BookingService {
 
         Booking confirmedBooking = bookingRepository.save(booking);
         log.info("Booking confirmed successfully: {}",bookingId);
-        //TODO: notification will be sent in payment service
         EmailPayload emailPayload = EmailPayload.builder()
                 .subject("Seat Confirmed and Payment Completed")
                 .body("Hello " + seatResponse.getUserEmail() + ",\n\n" +
