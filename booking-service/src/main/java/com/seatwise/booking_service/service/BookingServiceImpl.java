@@ -35,12 +35,13 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto createBooking(CreateBookingRequest request, UUID userId, String userEmail, String userTimeZone) {
-        log.info("Creating booking for user: {} for event: {} seat: {}", userId, request.getEventId(), request.getSeatId());
+        log.info("Starting atomic booking process for user: {} | Event: {} | Seat: {}", userId, request.getEventId(), request.getSeatId());
 
-        // Check if booking already exists for this event and seat
+        // 1. Check if booking already exists (Idempotency check)
         bookingRepository.findByEventIdAndSeatId(request.getEventId(), request.getSeatId())
                 .ifPresent(existing -> {
-                    throw new ConflictException("Booking already exists for this seat , move to payment");
+                    log.warn("Booking already exists for seat {} in event {}", request.getSeatId(), request.getEventId());
+                    throw new ConflictException("Booking already exists for this seat, please proceed to payment");
                 });
 
         Booking booking = Booking.builder()
@@ -51,10 +52,86 @@ public class BookingServiceImpl implements BookingService {
                 .reservedAt(Instant.now())
                 .build();
 
-        SeatResponse seatResponse = eventService.reserveSeat(request.getSeatId(), request.getEventId(), userId, userEmail);
-        Booking savedBooking = bookingRepository.save(booking);
-        log.info("Booking created successfully with ID: {}", savedBooking.getId());
+        boolean seatReserved = false;
+        Booking savedBooking = null;
 
+        try {
+            // 2. Reserve Seat in External Service
+            // This is the first step in our Saga. If it fails, we haven't changed the local state yet.
+            log.debug("Step 1: Reserving seat {} via EventService", request.getSeatId());
+            SeatResponse seatResponse = eventService.reserveSeat(request.getSeatId(), request.getEventId(), userId, userEmail);
+            seatReserved = true;
+
+            // 3. Save Booking in Local Database
+            // If this fails, we must unreserve the seat.
+            log.debug("Step 2: Saving booking record to local database");
+            savedBooking = bookingRepository.save(booking);
+
+            // 4. Send Reservation Email (Async/Best-effort in Saga context)
+            // If email fails, we might still proceed, or choose to rollback. 
+            // Here we treat it as part of the transaction for maximum consistency.
+            log.debug("Step 3: Sending reservation email");
+            sendReservationEmail(savedBooking, seatResponse.getUserEmail(), userId);
+
+            // 5. Initiate Payment
+            // This is the most likely step to fail (network, external API).
+            // If it fails, we MUST rollback: delete booking and unreserve seat.
+            log.debug("Step 4: Initiating payment via PaymentService");
+            paymentService.initiatePayment(
+                    request.getPhoneNumber(),
+                    savedBooking.getId(),
+                    request.getAmount(),
+                    userId,
+                    userEmail,
+                    request.getOrderReference(),
+                    request.getDescription()
+            );
+
+            log.info("Booking process completed successfully for ID: {}", savedBooking.getId());
+            return mapToDto(savedBooking, userTimeZone);
+
+        } catch (Exception e) {
+            log.error("Failure in booking process for user {}. Initiating compensation/rollback. Error: {}", userId, e.getMessage());
+            rollbackBooking(seatReserved, request.getSeatId(), userId, userEmail, savedBooking);
+            
+            if (e instanceof ConflictException || e instanceof BadRequestException) {
+                throw e;
+            }
+            throw new BadRequestException("Booking failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Compensating transaction logic to ensure atomicity.
+     */
+    private void rollbackBooking(boolean seatReserved, UUID seatId, UUID userId, String userEmail, Booking savedBooking) {
+        log.info("Rolling back partial booking state for seat: {}", seatId);
+        
+        // Order of rollback is usually the reverse of execution
+        
+        // 1. Delete local booking if it was saved
+        if (savedBooking != null && savedBooking.getId() != null) {
+            try {
+                log.debug("Rollback: Deleting local booking record {}", savedBooking.getId());
+                bookingRepository.deleteById(savedBooking.getId());
+            } catch (Exception e) {
+                log.error("Critical error: Failed to delete local booking during rollback: {}", e.getMessage());
+            }
+        }
+
+        // 2. Unreserved seat in external service
+        if (seatReserved) {
+            try {
+                log.debug("Rollback: Releasing seat {} in external event-service", seatId);
+                eventService.unreserveSeat(seatId, userId, userEmail);
+            } catch (Exception e) {
+                log.error("Critical error: Failed to unreserved seat during rollback: {}", e.getMessage());
+                // This might lead to "hanging" reserved seats until the auto-release job picks them up.
+            }
+        }
+    }
+
+    private void sendReservationEmail(Booking savedBooking, String recipientEmail, UUID userId) {
         EmailPayload emailPayload = EmailPayload.builder()
                 .subject("Seat Reserved")
                 .body("Hello,\n\n" +
@@ -66,12 +143,9 @@ public class BookingServiceImpl implements BookingService {
                         "Thank you for using Seatwise.\n" +
                         "Seatwise Team")
                 .sender("info@seatwise.dpdns.org")
-                .recipient(seatResponse.getUserEmail())
+                .recipient(recipientEmail)
                 .build();
-        emailProducer.sendEmailNotification(seatResponse.getUserId(), emailPayload);
-        paymentService.initiatePayment(request.getPhoneNumber(),savedBooking.getId(),request.getAmount(),userId, userEmail, request.getOrderReference(),request.getDescription());
-
-        return mapToDto(savedBooking, userTimeZone);
+        emailProducer.sendEmailNotification(userId, emailPayload);
     }
 
     @Override

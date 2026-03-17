@@ -25,6 +25,8 @@ public interface EventService {
 
     SeatResponseDto reserveSeat(UUID seatId, UUID userId, String userTimeZone,String userEmail);
 
+    SeatResponseDto unreserveSeat(UUID seatId, UUID userId, String userTimeZone, String userEmail);
+
     SeatResponseDto confirmSeat(UUID seatId,UUID userId, String userTimeZone,String userEmail);
 
     Page<EventResponseDto> search(String query, String venueName, Instant fromTime, Instant toTime, Integer minAvailableSeats, Pageable pageable, String userTimeZone);

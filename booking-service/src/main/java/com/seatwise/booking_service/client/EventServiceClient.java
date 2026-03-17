@@ -49,6 +49,26 @@ public class EventServiceClient {
         }
     }
 
+    public SeatResponse unreserveSeat(UUID seatID, UUID userID, String userEmail) {
+        try {
+            BaseResponse<SeatResponse> response = webClient.patch()
+                    .uri("/api/v1/events/unreserve/{seatId}", seatID)
+                    .header("X-User-Id", String.valueOf(userID))
+                    .header("X-User-Email", userEmail)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<BaseResponse<SeatResponse>>() {
+                    }).block();
+            if (response != null && response.isSuccess() && response.getData() != null) {
+                return response.getData();
+            }
+            throw new RuntimeException("Failed to unreserve seat: " +
+                    (response != null ? response.getMessage() : "Unknown error"));
+        } catch (Exception e) {
+            log.error("Error unreserving seat: {}", e.getMessage());
+            throw new RuntimeException("Failed to unreserve seat", e);
+        }
+    }
+
     public SeatResponse confirmSeat(UUID seatID, UUID userID, String userEmail) {
         try {
             BaseResponse<SeatResponse> response = webClient.patch()

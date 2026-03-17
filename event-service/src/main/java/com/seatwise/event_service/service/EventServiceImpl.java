@@ -183,6 +183,26 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
+    public SeatResponseDto unreserveSeat(UUID seatId, UUID userId, String userTimeZone, String userEmail) {
+        Seat seat = seatRepo.findById(seatId).orElseThrow(() -> new ResourceNotFoundException("Seat", "id", seatId.toString()));
+        if (seat.getStatus() != ESeat.RESERVED) {
+            log.warn("Attempted to unreserve seat {} but it is not reserved (status: {})", seatId, seat.getStatus());
+            return mapToSeatResponseDto(seat, userTimeZone, userEmail);
+        }
+        if (seat.getUserId() != null && !seat.getUserId().equals(userId)) {
+            throw new BadRequestException("Seat is reserved by another user");
+        }
+        seat.setStatus(ESeat.AVAILABLE);
+        seat.setUserId(null);
+        seat.setReservedAt(null);
+        Event event = seat.getEvent();
+        event.setAvailableSeats(event.getAvailableSeats() + 1);
+        eventRepo.save(event);
+        return mapToSeatResponseDto(seatRepo.save(seat), userTimeZone, userEmail);
+    }
+
+    @Override
     public SeatResponseDto confirmSeat(UUID seatId, UUID userId, String userTimeZone,String userEmail) {
         Seat seat = seatRepo.findById(seatId).orElseThrow(() -> new ResourceNotFoundException("Seat", "id", seatId.toString()));
         if (seat.getStatus() != ESeat.RESERVED) {

@@ -200,6 +200,28 @@ public class EventController {
         );
     }
 
+    @PatchMapping("/unreserve/{seatId}")
+    @Operation(
+            summary = "Unreserve seat",
+            description = "Releases a previously reserved seat, making it available for other users."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Seat unreserved successfully"),
+            @ApiResponse(responseCode = "400", description = "Seat is not reserved or reserved by another user"),
+            @ApiResponse(responseCode = "404", description = "Seat not found")
+    })
+    public ResponseEntity<BaseResponse<SeatResponseDto>> unreserveSeat(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Email") String userEmail,
+            @RequestHeader(value = "time-zone", required = false) String userTimeZone,
+            @PathVariable UUID seatId
+    ) {
+        SeatResponseDto seat = eventService.unreserveSeat(seatId, userId, userTimeZone, userEmail);
+        return ResponseEntity.ok(
+                BaseResponse.success("Seat unreserved successfully", seat)
+        );
+    }
+
     @PatchMapping("/confirm/{seatId}")
     @Operation(
             summary = "Confirm seat booking",

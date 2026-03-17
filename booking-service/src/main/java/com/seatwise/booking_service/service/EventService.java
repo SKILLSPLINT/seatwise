@@ -31,8 +31,19 @@ public class EventService {
             log.info("confirming  user  id {}", userId);
             return client.confirmSeat(seatID,userId,userEmail);
         } catch (Exception e) {
-            log.error("To reserver seat failed , please try again", e);
-            throw new BadRequestException("To reserver seat failed , please try again");
+            log.error("To confirm seat failed , please try again", e);
+            throw new BadRequestException("To confirm seat failed , please try again");
+        }
+    }
+
+    void unreserveSeat(UUID seatID, UUID userId, String userEmail) {
+        try {
+            log.info("unreserving seat with id {}", seatID);
+            client.unreserveSeat(seatID, userId, userEmail);
+        } catch (Exception e) {
+            log.error("To unreserve seat failed: {}", e.getMessage());
+            // We don't necessarily want to throw here if it's already part of a rollback,
+            // but for consistency we can log it.
         }
     }
 
