@@ -61,3 +61,5 @@ seat:
 services:
   file-service:
     url: http://FILE-SERVICE
+  booking-service:
+    url: http://BOOKING-SERVICE

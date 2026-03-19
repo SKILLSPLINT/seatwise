@@ -68,14 +68,14 @@ public class BookingServiceImpl implements BookingService {
             savedBooking = bookingRepository.save(booking);
 
             // 4. Send Reservation Email (Async/Best-effort in Saga context)
-            // If email fails, we might still proceed, or choose to rollback. 
+            // If email fails, we might still proceed or choose to roll back.
             // Here we treat it as part of the transaction for maximum consistency.
             log.debug("Step 3: Sending reservation email");
             sendReservationEmail(savedBooking, seatResponse.getUserEmail(), userId);
 
             // 5. Initiate Payment
             // This is the most likely step to fail (network, external API).
-            // If it fails, we MUST rollback: delete booking and unreserve seat.
+            // If it fails, we MUST roll back: delete booking and unreserve seats.
             log.debug("Step 4: Initiating payment via PaymentService");
             paymentService.initiatePayment(
                     request.getPhoneNumber(),
@@ -217,6 +217,14 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", bookingId));
         return mapToDto(booking, userTimeZone);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBookingBySeatId(UUID seatId) {
+        log.info("Deleting booking for seat: {}", seatId);
+        bookingRepository.deleteBySeatId(seatId);
+        log.info("Booking for seat {} deleted successfully", seatId);
     }
 
     private BookingResponseDto mapToDto(Booking booking, String userTimeZone) {

@@ -17,4 +17,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     Optional<Booking> findByEventIdAndSeatId(UUID eventId, UUID seatId);
 
     Optional<Booking> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteBySeatId(UUID seatId);
 }

@@ -1,5 +1,6 @@
 package com.seatwise.event_service.service;
 
+import com.seatwise.event_service.client.BookingServiceClient;
 import com.seatwise.event_service.dto.EventSpecifications;
 import com.seatwise.event_service.dto.request.CreateEventRequest;
 import com.seatwise.event_service.dto.request.UpdateEventRequest;
@@ -42,6 +43,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepo;
     private final SeatRepository seatRepo;
     private final FileService fileService;
+    private final BookingServiceClient bookingServiceClient;
 
     @Value("${seat.release.timeout}")
     private String RESERVATION_TIMEOUT;
@@ -234,7 +236,6 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Scheduled(fixedRateString = "${seat.release.interval}")
     public void releaseSeat() {
-        //TODO: after releasing seat  delete  its booking  record so it become available
         Instant now = Instant.now();
         List<Seat> reservedSeats = seatRepo.findByStatus(ESeat.RESERVED);
 
@@ -255,12 +256,21 @@ public class EventServiceImpl implements EventService {
                 continue;
             }
 
+            log.info("Releasing seat {} because reservation expired", seat.getId());
             seat.setStatus(ESeat.AVAILABLE);
             seat.setReservedAt(null);
             seat.setUserId(null);
 
             Event event = seat.getEvent();
             event.setAvailableSeats(event.getAvailableSeats() + 1);
+
+            // Notify booking-service to delete the corresponding booking
+            try {
+                bookingServiceClient.deleteBookingBySeatId(seat.getId());
+            } catch (Exception e) {
+                log.error("Failed to notify booking-service to delete booking for seat {}: {}", 
+                        seat.getId(), e.getMessage());
+            }
 
             releasedCount++;
         }

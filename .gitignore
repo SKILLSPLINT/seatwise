@@ -30,8 +30,11 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
 
 ### Environment Files (secrets) ###
 file-service/.env
 *.env.local
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore

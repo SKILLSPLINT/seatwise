@@ -176,4 +176,25 @@ public class BookingController {
                 BaseResponse.success("Booking confirmed successfully", booking)
         );
     }
+
+    @DeleteMapping("/seat/{seatId}")
+    @Operation(
+            summary = "Delete booking by seat ID",
+            description = "Deletes the booking associated with a specific seat ID. Used internally when a seat is released.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Booking deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - valid JWT token required"),
+            @ApiResponse(responseCode = "404", description = "Booking not found")
+    })
+    public ResponseEntity<BaseResponse<Void>> deleteBookingBySeatId(
+            @Parameter(description = "Seat ID", required = true)
+            @PathVariable UUID seatId
+    ) {
+        bookingService.deleteBookingBySeatId(seatId);
+        return ResponseEntity.ok(
+                BaseResponse.success("Booking deleted successfully", null)
+        );
+    }
 }
